@@ -1,0 +1,35 @@
+Prerequisites
+=============
+
+Packages for building RPMs (rpm-build, rpm-devel, rpmlint and rpmdevtools)
+should already be installed on your workstation by ansible.
+
+
+Building Packages
+=================
+
+A list of the available packages can be obtained using:
+
+$ invoke list-packages
+
+When building a package for the first time, it is necessary to install the build
+dependencies:
+
+$ invoke install-build-deps <package>
+
+Next, the package can be build:
+
+$ invoke build-package <package>
+
+
+Package Specific Options
+========================
+
+Some spec files provide additional configuration options. These are explained in
+the section at the top of the spec file.
+
+For example, the python3 package allows for a suffix to be used:
+
+$ VORTEX_PYTHON_SUFFIX=-feature-freeze invoke build-package vortex-python3
+
+This will add the provided suffix to both the package name and install directory.

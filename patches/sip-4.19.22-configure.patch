@@ -1,0 +1,11 @@
+--- configure.py	2020-04-02 19:20:14.000000000 +0200
++++ ../configure.py	2020-05-21 12:40:02.264443715 +0200
+@@ -406,7 +406,7 @@
+             # There will only be one element.
+             files, path = gen_installs[0]
+             pro.write("\n")
+-            pro.write("sip_h.files = %s\n" % " ".join(files))
++            pro.write("sip_h.files = %s\n" % files)
+             pro.write("sip_h.path = %s\n" % quote(path))
+             pro.write("INSTALLS += sip_h\n")
+ 
