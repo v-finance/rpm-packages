@@ -58,6 +58,7 @@ def install_build_deps(ctx, package):
         return
 
     print("Installing build dependencies for package {}".format(package))
+    # FIXME: Get rid of sudo using mock?
     ctx.run("sudo dnf -y builddep {}".format(get_spec_path(package)))
 
 
@@ -77,4 +78,62 @@ def build_package(ctx, package):
     ctx.run("rpmdev-setuptree")
     copy_patches()
     ctx.run("rpmbuild -bb {}".format(get_spec_path(package)))
+
+
+def clean_rpm_packages(arch='x86_64'):
+    """
+    Delete packages from $HOME/rpmbuild/RPMS/<arch> directory.
+    """
+    os.system("rm {}".format(os.path.join(os.path.join("~/rpmbuild/RPMS", arch), "*.rpm")))
+
+def get_rpm_packages(arch='x86_64'):
+    """
+    Get a list of RPM packages in the $HOME/rpmbuild/RPMS/<arch> directory.
+    """
+    packages = []
+    rpms_path = os.path.join(os.path.expanduser('~'), os.path.join("rpmbuild/RPMS", arch))
+    for item in os.listdir(rpms_path):
+        if item.endswith(".rpm"):
+            packages.append(os.path.join(rpms_path, item))
+    return packages
+
+def find_newly_build_rpm_package(old_rpms, new_rpms):
+    """
+    Find RPM package in new_rpms that is not in old_rpms list.
+    """
+    for rpm in new_rpms:
+        if rpm not in old_rpms:
+            return rpm
+
+
+@task
+def build_all_packages(ctx):
+    """
+    Build and install all the RPM packages. Installation is needed since there are dependencies between packages.
+    """
+    # packages in correct (dependency) order
+    packages = [
+        'vortex-openssl',
+        'vortex-python3',
+        'vortex-qt5',
+        'vortex-sip',
+        'vortex-pyqt5'
+    ]
+
+    print("Building all packages")
+
+    # remove previously build RPMS
+    clean_rpm_packages()
+
+    for package in packages:
+        # install build dependencies
+        install_build_deps(ctx, package)
+        # build the package
+        old_rpms = get_rpm_packages()
+        build_package(ctx, package)
+        new_rpms = get_rpm_packages()
+        # install the package
+        rpm = find_newly_build_rpm_package(old_rpms, new_rpms)
+        if rpm:
+            os.system("sudo rpm -i '{}'".format(rpm))
 
