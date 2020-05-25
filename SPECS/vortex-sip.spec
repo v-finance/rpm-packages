@@ -13,6 +13,10 @@ Version: %{major_version}.%{minor_version}.%{patch_version}
 
 # python package to use (e.g. python-3.4.4-default for vortex-python-3.4.4-default...rpm)
 %global python_package	%{getenv:VORTEX_PYTHON_PACKAGE}
+# Use python-3.4.4-vortex if VORTEX_PYTHON_PACKAGE is not set
+%if "%{python_package}" == ""
+%global python_package	python-3.4.4-vortex
+%endif
 %global python_root 	/vortex/%{python_package}
 
 %global qt5_root	/vortex/Qt-5.15.0
