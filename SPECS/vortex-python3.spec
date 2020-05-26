@@ -183,8 +183,8 @@ sed -i "s|#\!/usr/bin/env python|#\!%{install_dir}/bin/python3|g" %{buildroot}%{
 
 
 %postun
-# remove all files in the installation dir (e.g. installed pip packages etc.)
-rm -rf %{install_dir}
+# remove files installed by pip packages etc.
+rm -rf %{install_dir}/lib/python%{pybasever}
 
 
 %files

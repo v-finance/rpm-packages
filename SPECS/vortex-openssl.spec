@@ -99,24 +99,7 @@ make install_sw
 
 
 %files
-# binaries
-%dir %{install_dir}/bin
-%{install_dir}/bin/openssl
-%{install_dir}/bin/c_rehash
-# include files
-%dir %{install_dir}/include/openssl
-%{install_dir}/include/openssl/*
-# libraries
-%dir %{install_dir}/lib
-%{install_dir}/lib/libcrypto.a
-%{install_dir}/lib/libssl.a
-%dir %{install_dir}/lib/pkgconfig
-%{install_dir}/lib/pkgconfig/*
-# config files
-%dir %{install_dir}/share/openssl
-%dir %{install_dir}/share/openssl/misc
-%{install_dir}/share/openssl/misc/*
-%{install_dir}/share/openssl/openssl.cnf
+%{install_dir}
 
 
 %changelog
