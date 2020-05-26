@@ -3,7 +3,7 @@
 %global minor_version	15
 %global patch_version	0
 # RPM package release version
-%global release_version	1
+%global release_version	2
 
 # bundle name
 %global bundle_name	%{getenv:VORTEX_BUNDLE}
@@ -14,7 +14,7 @@
 # github repository
 %global	github_repo	https://github.com/qt/qt5.git
 # branch name on github
-%global branch_name	5.15
+%global branch_name	v5.15.0
 
 %global arch_triplet	%(gcc -dumpmachine)
 %global install_dir 	/vortex/%{arch_triplet}/%{bundle_name}
