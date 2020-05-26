@@ -23,7 +23,11 @@ $ invoke build-package <package>
 
 To build and install all packages, the following command can be used:
 
-$ invoke build-all-packages
+$ invoke build-all-packages	# requires sudo
+
+To build all packages without sudo, mock can be used:
+
+$ invoke mock-build-packages
 
 
 Naming Conventions

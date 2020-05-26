@@ -79,6 +79,23 @@ def build_package(ctx, package):
     copy_patches()
     ctx.run("rpmbuild -bb {}".format(get_spec_path(package)))
 
+@task
+def build_source_package(ctx, package):
+    """
+    Build the RPM source package.
+    """
+    if package not in get_packages():
+        print("Package {} not found. Available packages:".format(package))
+        list_packages(ctx)
+        return
+
+    print("Building source package: {}".format(package))
+
+    # make sure the $HOME/rpmbuild directories exist
+    ctx.run("rpmdev-setuptree")
+    copy_patches()
+    ctx.run("rpmbuild -bs {}".format(get_spec_path(package)))
+
 
 def clean_rpm_packages(arch='x86_64'):
     """
@@ -135,5 +152,40 @@ def build_all_packages(ctx):
         # install the package
         rpm = find_newly_build_rpm_package(old_rpms, new_rpms)
         if rpm:
-            os.system("sudo rpm -i '{}'".format(rpm))
+            # upgrade is same as install but replaces older versions if needed
+            os.system("sudo rpm --upgrade '{}'".format(rpm))
+
+
+@task
+def build_all_source_packages(ctx):
+    """
+    Build all the RPM source packages.
+    """
+    # delete sources to ensure we have the latest version
+    ctx.run("rm ~/rpmbuild/SOURCES/*")
+    # build source RPMs
+    for package in get_packages():
+        build_source_package(ctx, package)
+
+
+@task
+def mock_build_packages(ctx):
+    """
+    Build all the RPM packages using mock. This does not require root privileges
+    but the user needs to be in the mock group.
+    """
+    # delete old source RPMs
+    ctx.run("rm ~/rpmbuild/SRPMS/*")
+    # rebuild all source RPMs
+    build_all_source_packages(ctx)
+    # create list with source RPMs
+    packages = []
+    srpms_path = os.path.join(os.path.expanduser('~'), "rpmbuild/SRPMS")
+    for item in os.listdir(srpms_path):
+        if item.endswith('.src.rpm'):
+            packages.append(os.path.join(srpms_path, item))
+    # run mock with options:
+    #   --chain             build packages that depend on each other
+    #   --enable-network    make sure we can access github
+    ctx.run("mock --enable-network --chain {}".format(" ".join(packages)))
 
