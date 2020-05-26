@@ -1,19 +1,34 @@
+# upstream version
+%global major_version	1
+%global minor_version	0
+%global patch_version	2u
+# RPM package release version
+%global release_version	1
+
+# bundle name
+%global bundle_name	%{getenv:VORTEX_BUNDLE}
+%if "%{bundle_name}" == ""
+%global bundle_name	stable
+%endif
+
+%global archive_file 	OpenSSL_1_0_2u.tar.gz
+%global archive_dir 	openssl-OpenSSL_1_0_2u
+
+%global install_dir 	/vortex/%{bundle_name}
+
+# ================= IT SHOULD NOT BE NECESSARY TO MAKE CHANGES BELOW ==============================
+
 # ==================
 # Top-level metadata
 # ==================
 
-Name: vortex-openssl
+Name: vortex-%{bundle_name}-openssl
 Summary: OpenSSL 1.0.x library compatible with python 3.4
 URL: https://www.openssl.org/
 License: Apache v2
 
-Version: 1.0.2u
-Release: 1%{?dist}
-
-%global archivefile OpenSSL_1_0_2u.tar.gz
-%global archivedir openssl-OpenSSL_1_0_2u
-
-%global vortexdir /vortex
+Version: %{major_version}.%{minor_version}.%{patch_version}
+Release: %{release_version}%{?dist}
 
 # =======================
 # Build-time requirements
@@ -24,7 +39,7 @@ Release: 1%{?dist}
 BuildRequires: gcc-c++
 BuildRequires: glibc-devel
 BuildRequires: make
-#BuildRequires: perl
+BuildRequires: perl
 BuildRequires: pkgconfig
 BuildRequires: tar
 
@@ -33,13 +48,13 @@ BuildRequires: tar
 # =======================
 
 %undefine _disable_source_fetch
-Source0: https://github.com/openssl/openssl/archive/%{archivefile}
+Source0: https://github.com/openssl/openssl/archive/%{archive_file}
 
 # ==========================================
 # Descriptions, and metadata for subpackages
 # ==========================================
 
-Requires: glibc 
+Requires: glibc
 
 %description
 Custom Vortex OpenSSL build that is compatible with python 3.4.
@@ -50,25 +65,25 @@ Custom Vortex OpenSSL build that is compatible with python 3.4.
 
 %prep
 cd %{_topdir}/BUILD
-rm -rf %{archivedir}
-tar zxvf %{_topdir}/SOURCES/%{archivefile}
-cd %{archivedir}
+rm -rf %{archive_dir}
+tar zxvf %{_topdir}/SOURCES/%{archive_file}
+cd %{archive_dir}
 
 # ======================================================
 # Configuring and building the code:
 # ======================================================
 
 %build
-cd %{archivedir}
-./config --install_prefix=%{buildroot} --prefix=%{vortexdir}/usr --openssldir=%{vortexdir}/usr/openssl -fPIC
-make %{?_smp_mflags}
+cd %{archive_dir}
+./config --install_prefix=%{buildroot} --prefix=%{install_dir} --openssldir=%{install_dir}/share/openssl -fPIC
+%make_build
 
 # ======================================================
 # Checks for packaging issues
 # ======================================================
 
 %check
-cd %{archivedir}
+cd %{archive_dir}
 make test
 
 
@@ -78,26 +93,34 @@ make test
 
 %install
 rm -rf $RPM_BUILD_ROOT
-cd %{archivedir}
+cd %{archive_dir}
 # Install the software only (no documentation)
 make install_sw
 
 
 %files
 # binaries
-%{vortexdir}%{_bindir}/openssl
-%{vortexdir}%{_bindir}/c_rehash
+%dir %{install_dir}/bin
+%{install_dir}/bin/openssl
+%{install_dir}/bin/c_rehash
 # include files
-%{vortexdir}%{_includedir}/openssl/*
+%dir %{install_dir}/include/openssl
+%{install_dir}/include/openssl/*
 # libraries
-%{vortexdir}/usr/lib/libcrypto.a
-%{vortexdir}/usr/lib/libssl.a
-%{vortexdir}/usr/lib/pkgconfig/*
+%dir %{install_dir}/lib
+%{install_dir}/lib/libcrypto.a
+%{install_dir}/lib/libssl.a
+%dir %{install_dir}/lib/pkgconfig
+%{install_dir}/lib/pkgconfig/*
 # config files
-%{vortexdir}/usr/openssl/misc/*
-%{vortexdir}/usr/openssl/openssl.cnf
+%dir %{install_dir}/share/openssl
+%dir %{install_dir}/share/openssl/misc
+%{install_dir}/share/openssl/misc/*
+%{install_dir}/share/openssl/openssl.cnf
 
 
 %changelog
+* Tue May 26 2020 tim.vandermeersch@vortex-financials.be
+- Use bundle name
 * Wed May 13 2020 tim.vandermeersch@vortex-financials.be
 - Initial version

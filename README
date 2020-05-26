@@ -26,24 +26,28 @@ To build and install all packages, the following command can be used:
 $ invoke build-all-packages
 
 
+Naming Conventions
+==================
+
+- Packages always have a bundle name (e.g. stable) associated with them.
+- Package names start with the prefix "vortex-<bundle_name>-" (e.g. vortex-stable-).
+  This helps to distinguish them from other packages provided by CentOS and
+  vortex packages from other bundles.
+- Packages are installed to the "/vortex/<bundle_name>" directory.
+
+
 LD_LIBRARY_PATH
 ===============
 
 Since packages are not installed to default locations, it is necessary to set the
 LD_LIBRARY_PATH environment variable to make sure the correct libraries are used.
+The dynamic libraries are always located in the "/vortex/<bundle_name>/lib"
+directory.
 
 Example:
 
-$ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/vortex/python-3.4.4-vortex/lib:/vortex/Qt-5.15.0/lib"
+$ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/vortex/stable/lib"
 $ ...
-
-
-Naming Conventions
-==================
-
-- All package names start with the prefix "vortex-". This helps to distinguish
-  them from other packages provided by CentOS.
-- Packages are installed to the "/vortex" directory.
 
 
 Dependencies Between Packages
@@ -57,32 +61,14 @@ vortex-sip		vortex-openssl, vortex-python3, vortex-qt5
 vortex-pyqt5		vortex-openssl, vortex-python3, vortex-qt5, vortex-sip
 
 
-Package Specific Options
-========================
+Setting the Bundle Name
+=======================
 
-Some spec files provide additional configuration options. These are explained in
-the section at the top of the spec file.
+If no bundle name is specified, a default name is used (currently stable).
 
-vortex-python3
---------------
+To set the bundle name, the VORTEX_BUNDLE environment variable should be set when
+building a package.
 
-The python3 package allows for a suffix to be used:
+For example:
 
-$ VORTEX_PYTHON_SUFFIX=-feature-freeze invoke build-package vortex-python3
-
-This will add the provided suffix to both the package name and install directory.
-
-vortex-sip and vortex-pyqt5
----------------------------
-
-Packages that depend on python need to build against a specific version of
-python. This version can be set using the VORTEX_PYTHON_PACKAGE environment
-variable. If this variable is not set, the spec file provides a default value.
-
-Examples:
-
-$ invoke build-package vortex-sip
-$ invoke build-package vortex-pyqt5
-
-$ VORTEX_PYTHON_PACKAGE=python-3.4.4-vortex invoke build-package vortex-sip
-$ VORTEX_PYTHON_PACKAGE=python-3.4.4-vortex invoke build-package vortex-pyqt5
+$ VORTEX_BUNDLE=feature-freeze invoke build-package vortex-python3

@@ -1,25 +1,26 @@
-# sip version
+# upstream version
 %global major_version	4
 %global minor_version	19
 %global patch_version	22
 # RPM package release version
 %global release_version	1
 
+# bundle name
+%global bundle_name	%{getenv:VORTEX_BUNDLE}
+%if "%{bundle_name}" == ""
+%global bundle_name	stable
+%endif
+
 Version: %{major_version}.%{minor_version}.%{patch_version}
 
-%global archive_file sip-%{version}.tar.gz
-%global archive_url https://www.riverbankcomputing.com/static/Downloads/sip/%{version}/%{archive_file}
-%global archive_dir sip-%{version}
+%global archive_file 	sip-%{version}.tar.gz
+%global archive_url 	https://www.riverbankcomputing.com/static/Downloads/sip/%{version}/%{archive_file}
+%global archive_dir 	sip-%{version}
 
-# python package to use (e.g. python-3.4.4-default for vortex-python-3.4.4-default...rpm)
-%global python_package	%{getenv:VORTEX_PYTHON_PACKAGE}
-# Use python-3.4.4-vortex if VORTEX_PYTHON_PACKAGE is not set
-%if "%{python_package}" == ""
-%global python_package	python-3.4.4-vortex
-%endif
-%global python_root 	/vortex/%{python_package}
+%global install_dir 	/vortex/%{bundle_name}
 
-%global qt5_root	/vortex/Qt-5.15.0
+# path to qmake executable
+%global qt5_qmake	%{install_dir}/bin/qmake
 
 # ================= IT SHOULD NOT BE NECESSARY TO MAKE CHANGES BELOW ==============================
 
@@ -28,7 +29,7 @@ Version: %{major_version}.%{minor_version}.%{patch_version}
 # Top-level metadata
 # ==================
 
-Name: vortex-%{python_package}-sip
+Name: vortex-%{bundle_name}-sip
 Summary: SIP - Python/C++ Bindings Generator
 URL: http://www.riverbankcomputing.com/software/sip/intro
 License: GPLv2 or GPLv3 and (GPLv3+ with exceptions)
@@ -41,8 +42,8 @@ Release: %{release_version}%{?dist}
 
 BuildRequires: gcc-c++
 BuildRequires: sed
-BuildRequires: vortex-%{python_package}
-BuildRequires: vortex-qt5
+BuildRequires: vortex-%{bundle_name}-python3
+BuildRequires: vortex-%{bundle_name}-qt5
 
 
 # =======================
@@ -60,8 +61,8 @@ Patch0: sip-4.19.22-configure.patch
 # Descriptions, and metadata for subpackages
 # ==========================================
 
-Requires: vortex-%{python_package}
-Requires: vortex-qt5
+Requires: vortex-%{bundle_name}-python3
+Requires: vortex-%{bundle_name}-qt5
 
 %description
 Custom Vortex sip build.
@@ -86,47 +87,44 @@ cd %{archive_dir}
 %build
 cd %{archive_dir}
 
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:%{python_root}/lib"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:%{install_dir}/lib"
 # determine python version (e.g. 3.4)
-%global python_version $(%{python_root}/bin/python3 -c 'import sys; print("{}.{}".format(sys.version_info.major, sys.version_info.minor))')
+%global python_version $(%{install_dir}/bin/python3 -c 'import sys; print("{}.{}".format(sys.version_info.major, sys.version_info.minor))')
 # determine python site-packages directory
-%global python_sitedir $(%{python_root}/bin/python3 -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
+%global python_sitedir $(%{install_dir}/bin/python3 -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
 # determine python include directory
-%global python_incdir $(%{python_root}/bin/python3 -c 'import sysconfig; print(sysconfig.get_paths()["platinclude"])')
+%global python_incdir $(%{install_dir}/bin/python3 -c 'import sysconfig; print(sysconfig.get_paths()["platinclude"])')
 
 # create config.txt file
 cat > config.txt << EOF
 py_platform=linux-g++
 py_inc_dir=%{python_incdir}
-py_pylib_dir=%{python_root}/libs
+py_pylib_dir=%{install_dir}/libs
 EOF
 
 echo "config.txt:"
 cat config.txt
 
-echo "python_root:    	%{python_root}"
+echo "install_dir:    	%{install_dir}"
 echo "python_version: 	%{python_version}"
 echo "python_sitedir: 	%{python_sitedir}"
 echo "python_incdir: 	%{python_incdir}"
-echo
-echo
-echo
 
 # Configure
-%{python_root}/bin/python3 configure.py \
+%{install_dir}/bin/python3 configure.py \
 	--configuration=config.txt \
 	--target-py-version=%{python_version} \
 	--use-qmake \
-	--bindir="%{python_root}/bin" \
+	--bindir="%{install_dir}/bin" \
 	--destdir="%{python_sitedir}" \
 	--incdir="%{python_incdir}" \
-	--sipdir="%{python_root}/share/sip" \
+	--sipdir="%{install_dir}/share/sip" \
 	--stubsdir="%{python_sitedir}" \
 	--sip-module=PyQt5.sip \
 	--no-dist-info
 
 # Generate makefiles using qmake
-%{qt5_root}/bin/qmake
+%{qt5_qmake}
 
 # Build using make
 %make_build
@@ -143,10 +141,12 @@ make INSTALL_ROOT=%{buildroot} INSTALL="install -p" install
 
 %files
 # include all files for now
-%{python_root}
+%{install_dir}
 
 
 
 %changelog
+* Tue May 26 2020 tim.vandermeersch@vortex-financials.be
+- Use bundle name
 * Wed May 20 2020 tim.vandermeersch@vortex-financials.be
 - Initial version

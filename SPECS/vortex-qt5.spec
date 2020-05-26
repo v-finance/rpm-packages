@@ -1,17 +1,22 @@
-
-# Qt version
+# upstream version
 %global major_version	5
 %global minor_version	15
 %global patch_version	0
 # RPM package release version
 %global release_version	1
 
+# bundle name
+%global bundle_name	%{getenv:VORTEX_BUNDLE}
+%if "%{bundle_name}" == ""
+%global bundle_name	stable
+%endif
+
 # github repository
 %global	github_repo	https://github.com/qt/qt5.git
 # branch name on github
 %global branch_name	5.15
 
-%global install_dir	/vortex/Qt-%{major_version}.%{minor_version}.%{patch_version}
+%global install_dir	/vortex/%{bundle_name}
 
 # available submodules to build:
 #
@@ -79,7 +84,7 @@
 # Top-level metadata
 # ==================
 
-Name: vortex-qt5
+Name: vortex-%{bundle_name}-qt5
 Summary: Custom Vortex Qt5 build
 URL: https://www.qt.io/
 License: LGPL
@@ -188,6 +193,9 @@ git checkout %{branch_name}
 mkdir qt5-build
 cd qt5-build
 
+%global install_datadir		%{install_dir}/share/qt5
+%global install_archdatadir	%{install_dir}/lib/qt5
+
 # configure
 ../qt5/configure -verbose \
 	-opensource \
@@ -196,6 +204,8 @@ cd qt5-build
   	-platform linux-g++ \
 	-shared \
 	-prefix %{install_dir} \
+	-archdatadir %{install_archdatadir} \
+	-datadir %{install_datadir} \
   	%{!?examples:-nomake examples} \
   	%{!?tests:-nomake tests} \
   	-fontconfig \
@@ -216,7 +226,7 @@ cd qt5-build
 	-system-zlib \
 	-no-directfb
 
-make %{?_smp_mflags}
+%make_build
 
 # ======================================================
 # Installing the built code:
@@ -227,7 +237,7 @@ rm -rf $RPM_BUILD_ROOT
 cd qt5-build
 make install INSTALL_ROOT=%{buildroot}
 
-sed -i "s|#\!/usr/bin/python|#\!/usr/bin/python3|g" %{buildroot}%{install_dir}/mkspecs/features/uikit/devices.py
+sed -i "s|#\!/usr/bin/python|#\!/usr/bin/python3|g" %{buildroot}%{install_archdatadir}/mkspecs/features/uikit/devices.py
 
 %files
 # include all files for now
@@ -236,6 +246,8 @@ sed -i "s|#\!/usr/bin/python|#\!/usr/bin/python3|g" %{buildroot}%{install_dir}/m
 
 
 %changelog
+* Tue May 26 2020 tim.vandermeersch@vortex-financials.be
+- Use bundle name
 * Tue May 19 2020 tim.vandermeersch@vortex-financials.be
 - Initial version
 - Only building qtbase and qtimageformats

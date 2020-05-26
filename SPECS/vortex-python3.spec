@@ -1,21 +1,20 @@
-
-# python version
+# upstream version
 %global major_version	3
 %global minor_version	4
 %global patch_version	4
 # RPM package release version
 %global release_version	1
 
+# bundle name
+%global bundle_name	%{getenv:VORTEX_BUNDLE}
+%if "%{bundle_name}" == ""
+%global bundle_name	stable
+%endif
+
 # branch name on github (e.g. https://github.com/v-finance/cpython/<branch_name>)
 %global branch_name	3.4.4-vortex
 
-# Set environment variable VORTEX_PYTHON_SUFFIX (e.g. -install1) to:
-#     - change package name
-#     - change installation path
-%global install_suffix	%{getenv:VORTEX_PYTHON_SUFFIX}
-%global install_dir	/vortex/python-%{branch_name}%{install_suffix}
-
-
+%global install_dir	/vortex/%{bundle_name}
 
 # ================= IT SHOULD NOT BE NECESSARY TO MAKE CHANGES BELOW ==============================
 
@@ -24,7 +23,7 @@
 # Top-level metadata
 # ==================
 
-Name: vortex-python-%{branch_name}%{install_suffix}
+Name: vortex-%{bundle_name}-python3
 Summary: Interpreter of the Python programming language
 URL: https://www.python.org/
 License: Python
@@ -32,8 +31,8 @@ License: Python
 Version: %{major_version}.%{minor_version}.%{patch_version}
 Release: %{release_version}%{?dist}
 
-%global archivefile %{branch_name}.tar.gz
-%global archivedir cpython-%{branch_name}
+%global archive_file %{branch_name}.tar.gz
+%global archive_dir cpython-%{branch_name}
 
 
 # ==================================
@@ -59,7 +58,7 @@ BuildRequires: expat-devel
 
 BuildRequires: findutils
 BuildRequires: gcc-c++
-#%if %{with gdbm}
+#%%if %%{with gdbm}
 #BuildRequires: gdbm-devel >= 1:1.13
 #%endif
 BuildRequires: gdbm-devel
@@ -84,7 +83,7 @@ BuildRequires: tar
 #BuildRequires: tix-devel
 #BuildRequires: tk-devel
 
-#%if %{with valgrind}
+#%%if %%{with valgrind}
 #BuildRequires: valgrind-devel
 #%endif
 
@@ -96,9 +95,9 @@ BuildRequires: /usr/bin/dtrace
 # workaround http://bugs.python.org/issue19804 (test_uuid requires ifconfig)
 BuildRequires: /usr/sbin/ifconfig
 
-BuildRequires: vortex-openssl
+BuildRequires: vortex-%{bundle_name}-openssl
 
-#%if %{with rewheel}
+#%%if %%{with rewheel}
 #BuildRequires: python3-setuptools
 #BuildRequires: python3-pip
 
@@ -113,14 +112,14 @@ BuildRequires: vortex-openssl
 
 %undefine _disable_source_fetch
 # FIXME
-#Source0: https://github.com/v-finance/cpython/archive/%{archivefile}
-Source0: https://github.com/tim-vdm/cpython/archive/%{archivefile}
+#Source0: https://github.com/v-finance/cpython/archive/%%{archive_file}
+Source0: https://github.com/tim-vdm/cpython/archive/%{archive_file}
 
 # ==========================================
 # Descriptions, and metadata for subpackages
 # ==========================================
 
-Requires: vortex-openssl
+Requires: vortex-%{bundle_name}-openssl
 
 Provides: %{install_dir}/bin/python
 
@@ -132,16 +131,18 @@ Custom Vortex python build.
 # ======================================================
 %prep
 cd %{_topdir}/BUILD
-rm -rf %{archivedir}
-tar zxvf %{_topdir}/SOURCES/%{archivefile}
-cd %{archivedir}
+rm -rf %{archive_dir}
+tar zxvf %{_topdir}/SOURCES/%{archive_file}
+cd %{archive_dir}
 
 # ======================================================
 # Configuring and building the code:
 # ======================================================
 
 %build
-cd %{archivedir}
+cd %{archive_dir}
+export VORTEX_BUNDLE_ROOT=%{install_dir}
+
 ./configure \
   --prefix=%{install_dir} \
   --enable-ipv6 \
@@ -154,7 +155,7 @@ cd %{archivedir}
   --with-lto \
   --with-ssl-default-suites=openssl
 
-make %{?_smp_mflags}
+%make_build
 
 # ======================================================
 # Installing the built code:
@@ -162,7 +163,9 @@ make %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-cd %{archivedir}
+cd %{archive_dir}
+export VORTEX_BUNDLE_ROOT=%{install_dir}
+
 make DESTDIR=%{buildroot} INSTALL="install -p" install
 
 %global pybasever %{major_version}.%{minor_version}
@@ -189,7 +192,8 @@ rm -rf %{install_dir}
 %{install_dir}
 
 
-
 %changelog
-* Mon May 19 2020 tim.vandermeersch@vortex-financials.be
+* Tue May 26 2020 tim.vandermeersch@vortex-financials.be
+- Use bundle name
+* Tue May 19 2020 tim.vandermeersch@vortex-financials.be
 - Initial version

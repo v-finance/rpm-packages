@@ -1,9 +1,15 @@
-# PyQt5 version
+# upstream version
 %global major_version	5
 %global minor_version	13
 %global patch_version	2
 # RPM package release version
 %global release_version	1
+
+# bundle name
+%global bundle_name	%{getenv:VORTEX_BUNDLE}
+%if "%{bundle_name}" == ""
+%global bundle_name	stable
+%endif
 
 Version: %{major_version}.%{minor_version}.%{patch_version}
 
@@ -16,15 +22,10 @@ Version: %{major_version}.%{minor_version}.%{patch_version}
 %global archive_url 	https://www.riverbankcomputing.com/static/Downloads/PyQt5/5.13.2/%{archive_file}
 %global archive_dir 	PyQt5-5.13.2
 
-# python package to use (e.g. python-3.4.4-default for vortex-python-3.4.4-default...rpm)
-%global python_package	%{getenv:VORTEX_PYTHON_PACKAGE}
-# Use python-3.4.4-vortex if VORTEX_PYTHON_PACKAGE is not set
-%if "%{python_package}" == ""
-%global python_package	python-3.4.4-vortex
-%endif
-%global python_root 	/vortex/%{python_package}
+%global install_dir 	/vortex/%{bundle_name}
 
-%global qt5_root	/vortex/Qt-5.15.0
+# path to qmake executable
+%global qt5_qmake	%{install_dir}/bin/qmake
 
 # ================= IT SHOULD NOT BE NECESSARY TO MAKE CHANGES BELOW ==============================
 
@@ -33,7 +34,7 @@ Version: %{major_version}.%{minor_version}.%{patch_version}
 # Top-level metadata
 # ==================
 
-Name: vortex-%{python_package}-pyqt5
+Name: vortex-%{bundle_name}-pyqt5
 Summary: Python Bindings for Qt5
 URL: http://www.riverbankcomputing.com/software/pyqt/intro
 License: GPLv3
@@ -46,7 +47,7 @@ Release: %{release_version}%{?dist}
 
 BuildRequires: gcc-c++
 BuildRequires: sed
-BuildRequires: vortex-%{python_package}-sip
+BuildRequires: vortex-%{bundle_name}-sip
 
 
 # =======================
@@ -61,7 +62,7 @@ Source0: %{archive_url}
 # Descriptions, and metadata for subpackages
 # ==========================================
 
-Requires: vortex-%{python_package}-sip
+Requires: vortex-%{bundle_name}-sip
 
 %description
 Custom Vortex PyQt5 build.
@@ -83,15 +84,15 @@ cd %{archive_dir}
 %build
 cd %{archive_dir}
 
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:%{python_root}/lib:%{qt5_root}/lib"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:%{install_dir}/lib"
 # determine python version (e.g. 3.4)
-%global python_version $(%{python_root}/bin/python3 -c 'import sys; print("{}.{}".format(sys.version_info.major, sys.version_info.minor))')
+%global python_version $(%{install_dir}/bin/python3 -c 'import sys; print("{}.{}".format(sys.version_info.major, sys.version_info.minor))')
 # determine python short version (e.g. 34)
-%global python_short_version $(%{python_root}/bin/python3 -c 'import sys; print("{}{}".format(sys.version_info.major, sys.version_info.minor))')
+%global python_short_version $(%{install_dir}/bin/python3 -c 'import sys; print("{}{}".format(sys.version_info.major, sys.version_info.minor))')
 # determine python site-packages directory
-%global python_sitedir $(%{python_root}/bin/python3 -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
+%global python_sitedir $(%{install_dir}/bin/python3 -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
 # determine python include directory
-%global python_incdir $(%{python_root}/bin/python3 -c 'import sysconfig; print(sysconfig.get_paths()["platinclude"])')
+%global python_incdir $(%{install_dir}/bin/python3 -c 'import sysconfig; print(sysconfig.get_paths()["platinclude"])')
 
 # create config.txt file
 #
@@ -100,7 +101,7 @@ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:%{python_root}/lib:%{qt5_root}/lib"
 cat > config.txt << EOF
 py_platform=linux-g++
 py_inc_dir=%{python_incdir}
-py_pylib_dir=%{python_root}/libs
+py_pylib_dir=%{install_dir}/libs
 py_pylib_lib=python%{python_short_version}
 qt_shared=True
 
@@ -111,24 +112,21 @@ EOF
 echo "config.txt:"
 cat config.txt
 
-echo "python_root:    	%{python_root}"
+echo "install_dir:    	%{install_dir}"
 echo "python_version: 	%{python_version}"
 echo "python_sitedir: 	%{python_sitedir}"
 echo "python_incdir: 	%{python_incdir}"
 
 # Configure
-%{python_root}/bin/python3 configure.py \
+%{install_dir}/bin/python3 configure.py \
 	--verbose \
 	--confirm-license \
 	--target-py-version=%{python_version} \
-	--qmake %{qt5_root}/bin/qmake \
-	--sip %{python_root}/bin/sip \
+	--qmake %{qt5_qmake} \
+	--sip %{install_dir}/bin/sip \
 	--configuration=config.txt \
 	--no-dist-info
 
-
-# Generate makefiles using qmake
-#%%{qt5_root}/bin/qmake
 
 # Build using make
 %make_build
@@ -145,10 +143,12 @@ make INSTALL_ROOT=%{buildroot} INSTALL="install -p" install
 
 %files
 # include all files for now
-%{python_root}
+%{install_dir}
 
 
 
 %changelog
+* Tue May 26 2020 tim.vandermeersch@vortex-financials.be
+- Use bundle name
 * Wed May 20 2020 tim.vandermeersch@vortex-financials.be
 - Initial version
