@@ -33,7 +33,9 @@ Naming Conventions
 - Package names start with the prefix "vortex-<bundle_name>-" (e.g. vortex-stable-).
   This helps to distinguish them from other packages provided by CentOS and
   vortex packages from other bundles.
-- Packages are installed to the "/vortex/<bundle_name>" directory.
+- Packages are installed to the "/vortex/<target_triplet>/<bundle_name>" directory.
+- See https://wiki.osdev.org/Target_Triplet for more information about the target
+  triplet. Currently, the output of "gcc -dumpmachine" is used.
 
 
 LD_LIBRARY_PATH
@@ -41,12 +43,12 @@ LD_LIBRARY_PATH
 
 Since packages are not installed to default locations, it is necessary to set the
 LD_LIBRARY_PATH environment variable to make sure the correct libraries are used.
-The dynamic libraries are always located in the "/vortex/<bundle_name>/lib"
-directory.
+The dynamic libraries are always located in the
+"/vortex/<target_triplet>/<bundle_name>/lib" directory.
 
 Example:
 
-$ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/vortex/stable/lib"
+$ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/vortex/x86_64-redhat-linux/stable/lib"
 $ ...
 
 

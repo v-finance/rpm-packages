@@ -14,7 +14,8 @@
 # branch name on github (e.g. https://github.com/v-finance/cpython/<branch_name>)
 %global branch_name	3.4.4-vortex
 
-%global install_dir	/vortex/%{bundle_name}
+%global arch_triplet	%(gcc -dumpmachine)
+%global install_dir 	/vortex/%{arch_triplet}/%{bundle_name}
 
 # ================= IT SHOULD NOT BE NECESSARY TO MAKE CHANGES BELOW ==============================
 

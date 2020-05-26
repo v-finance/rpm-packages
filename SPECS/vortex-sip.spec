@@ -17,7 +17,8 @@ Version: %{major_version}.%{minor_version}.%{patch_version}
 %global archive_url 	https://www.riverbankcomputing.com/static/Downloads/sip/%{version}/%{archive_file}
 %global archive_dir 	sip-%{version}
 
-%global install_dir 	/vortex/%{bundle_name}
+%global arch_triplet	%(gcc -dumpmachine)
+%global install_dir 	/vortex/%{arch_triplet}/%{bundle_name}
 
 # path to qmake executable
 %global qt5_qmake	%{install_dir}/bin/qmake

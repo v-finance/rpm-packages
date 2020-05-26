@@ -16,7 +16,8 @@
 # branch name on github
 %global branch_name	5.15
 
-%global install_dir	/vortex/%{bundle_name}
+%global arch_triplet	%(gcc -dumpmachine)
+%global install_dir 	/vortex/%{arch_triplet}/%{bundle_name}
 
 # available submodules to build:
 #

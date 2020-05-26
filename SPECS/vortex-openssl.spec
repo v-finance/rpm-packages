@@ -14,7 +14,8 @@
 %global archive_file 	OpenSSL_1_0_2u.tar.gz
 %global archive_dir 	openssl-OpenSSL_1_0_2u
 
-%global install_dir 	/vortex/%{bundle_name}
+%global arch_triplet	%(gcc -dumpmachine)
+%global install_dir 	/vortex/%{arch_triplet}/%{bundle_name}
 
 # ================= IT SHOULD NOT BE NECESSARY TO MAKE CHANGES BELOW ==============================
 

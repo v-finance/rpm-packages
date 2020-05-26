@@ -22,7 +22,8 @@ Version: %{major_version}.%{minor_version}.%{patch_version}
 %global archive_url 	https://www.riverbankcomputing.com/static/Downloads/PyQt5/5.13.2/%{archive_file}
 %global archive_dir 	PyQt5-5.13.2
 
-%global install_dir 	/vortex/%{bundle_name}
+%global arch_triplet	%(gcc -dumpmachine)
+%global install_dir 	/vortex/%{arch_triplet}/%{bundle_name}
 
 # path to qmake executable
 %global qt5_qmake	%{install_dir}/bin/qmake
