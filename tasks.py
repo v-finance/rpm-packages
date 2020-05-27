@@ -186,6 +186,7 @@ def mock_build_packages(ctx):
             packages.append(os.path.join(srpms_path, item))
     # run mock with options:
     #   --chain             build packages that depend on each other
+    #   --recurse           retry until all packages build successfully
     #   --enable-network    make sure we can access github
-    ctx.run("mock --enable-network --chain {}".format(" ".join(packages)))
+    ctx.run("mock --enable-network --recurse --chain {}".format(" ".join(packages)))
 
