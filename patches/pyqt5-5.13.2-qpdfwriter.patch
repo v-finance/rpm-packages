@@ -1,0 +1,27 @@
+--- PyQt5-5.13.2/sip/QtGui/qpdfwriter.sip	2019-11-02 19:54:12.000000000 +0100
++++ PyQt5-5.15.0/sip/QtGui/qpdfwriter.sip	2020-05-31 14:11:05.134516000 +0200
+@@ -2,7 +2,7 @@
+ //
+ // This file is part of the QtGui Python extension module.
+ //
+-// Copyright (c) 2019 Riverbank Computing Limited <info@riverbankcomputing.com>
++// Copyright (c) 2020 Riverbank Computing Limited <info@riverbankcomputing.com>
+ // 
+ // This file is part of PyQt5.
+ // 
+@@ -56,6 +56,15 @@ public:
+ %If (Qt_5_10_0 -)
+     QPagedPaintDevice::PdfVersion pdfVersion() const;
+ %End
++%If (Qt_5_15_0 -)
++    void setDocumentXmpMetadata(const QByteArray &xmpMetadata);
++%End
++%If (Qt_5_15_0 -)
++    QByteArray documentXmpMetadata() const;
++%End
++%If (Qt_5_15_0 -)
++    void addFileAttachment(const QString &fileName, const QByteArray &data, const QString &mimeType = QString());
++%End
+ 
+ private:
+     QPdfWriter(const QPdfWriter &);

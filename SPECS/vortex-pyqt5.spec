@@ -3,7 +3,7 @@
 %global minor_version	13
 %global patch_version	2
 # RPM package release version
-%global release_version	1
+%global release_version	2
 
 # bundle name
 %global bundle_name	%{getenv:VORTEX_BUNDLE}
@@ -58,6 +58,14 @@ BuildRequires: vortex-%{bundle_name}-sip
 %undefine _disable_source_fetch
 Source0: %{archive_url}
 
+# Qt 5.15.0 methods:
+# - void setDocumentXmpMetadata(const QByteArray &xmpMetadata);
+# - QByteArray documentXmpMetadata() const;
+# - void addFileAttachment(const QString &fileName, const QByteArray &data, const QString &mimeType = QString());
+%if "%{version}" == "5.13.2"
+Patch0: pyqt5-5.13.2-qcoremod.patch
+Patch1: pyqt5-5.13.2-qpdfwriter.patch
+%endif
 
 # ==========================================
 # Descriptions, and metadata for subpackages
@@ -77,6 +85,10 @@ rm -rf %{archive_dir}
 tar zxvf %{_topdir}/SOURCES/%{archive_file}
 cd %{archive_dir}
 
+%if "%{version}" == "5.13.2"
+%patch0 -p0 -b .backup
+%patch1 -p1 -b .backup
+%endif
 
 # ======================================================
 # Configuring and building the code:
