@@ -136,7 +136,11 @@ pushd build_win32
 	-prefix %{install_dir} \
 	-archdatadir %{install_archdatadir} \
 	-datadir %{install_datadir} \
-	-opengl desktop
+	-opengl desktop \
+	-no-feature-sqlmodel \
+	-no-sql-sqlite \
+	-no-sql-odbc
+
 popd
 	
 %mingw_make %{?_smp_mflags}
