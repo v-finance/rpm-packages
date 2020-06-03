@@ -110,6 +110,7 @@ Next, additional packages provide the libraries:
 - mingw-gettext
 - mingw-pkg-config
 - mingw-zlib
+- mingw-openssl
 
 The commands below assume all the source packages are in the present working
 directory.
@@ -151,7 +152,6 @@ $ rpmbuild --rebuild mingw-binutils-<version>.fc32.src.rpm
 $ sudo rpm -i ~/rpmbuild/RPMS/x86_64/mingw-binutils-generic-<version>.el8.x86_64.rpm
 $ sudo rpm -i ~/rpmbuild/RPMS/x86_64/mingw32-binutils-<version>.el8.x86_64.rpm
 $ sudo rpm -i ~/rpmbuild/RPMS/x86_64/mingw64-binutils-<version>.el8.x86_64.rpm
-
 
 Step 2.2: Building mingw-headers for the First Time
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -208,15 +208,66 @@ with:
 
 $ cp *.tar.xz ~/rpmbuild/SOURCES
 $ rpmbuild -bb mingw-gcc.spec
-$ # install the generated packages...
+$ sudo rpm -i /home/timvdm/rpmbuild/RPMS/x86_64/mingw32-cpp-<version>.el8.x86_64.rpm 
+$ sudo rpm -i /home/timvdm/rpmbuild/RPMS/x86_64/mingw32-gcc-<version>.el8.x86_64.rpm
+$ sudo rpm -i /home/timvdm/rpmbuild/RPMS/x86_64/mingw32-gcc-c++-<version>.el8.x86_64.rpm
+$ sudo rpm -i /home/timvdm/rpmbuild/RPMS/x86_64/mingw64-cpp-<version>.el8.x86_64.rpm 
+$ sudo rpm -i /home/timvdm/rpmbuild/RPMS/x86_64/mingw64-gcc-<version>.el8.x86_64.rpm
+$ sudo rpm -i /home/timvdm/rpmbuild/RPMS/x86_64/mingw64-gcc-c++-<version>.el8.x86_64.rpm
 
-Step 2.5: Continue Building Packages
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Step 2.5: Building mingw-crt and mingw-winpthreads
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Continue building the packages according to the list given above. mingw-gcc and
-mingw-headers needs to be uninstalled before mingw-winpthreads can be installed
-since the first headers package contained dummy pthread headers. Once this is
-done, the final version of mingw-headers and mingw-gcc can be build and
-installed (without editing the spec file).
+$ rpmbuild --rebuild mingw-crt-<version>.fc32.src.rpm
+$ sudo rpm -i RPMS/mingw32-crt-<version>.el8.noarch.rpm
+$ sudo rpm -i RPMS/mingw64-crt-<version>.el8.noarch.rpm
 
+$ rpmbuild --rebuild mingw-winpthreads-<version>.fc32.src.rpm
 
+Do not install mingw-winpthreads yet, it will conflict with the currently
+installed mingw-headers.
+
+Step 2.6: Uninstalling mingw-gcc and mingw-headers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+$ sudo rpm -e mingw32-gcc-c++ 
+$ sudo rpm -e mingw32-gcc
+$ sudo rpm -e mingw32-cpp
+$ sudo rpm -e mingw64-gcc-c++ 
+$ sudo rpm -e mingw64-gcc
+$ sudo rpm -e mingw64-cpp
+$ sudo rpm -e mingw32-headers 
+$ sudo rpm -e mingw64-headers 
+
+Step 2.7: Installing mingw-winpthreads
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+$ sudo rpm -i RPMS/mingw32-winpthreads-<version>.el8.noarch.rpm 
+$ sudo rpm -i RPMS/mingw64-winpthreads-<version>.el8.noarch.rpm 
+
+Step 2.8: Building final mingw-headers and mingw-gcc
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+$ rpmbuild --rebuild mingw-headers-<version>.fc32.src.rpm 
+$ sudo rpm -i /home/timvdm/rpmbuild/RPMS/noarch/mingw32-headers-<version>.el8.noarch.rpm
+$ sudo rpm -i /home/timvdm/rpmbuild/RPMS/noarch/mingw64-headers-<version>.el8.noarch.rpm
+
+$ rpmbuild --rebuild mingw-gcc-<version>.fc32.src.rpm
+$ sudo rpm -i /home/timvdm/rpmbuild/RPMS/x86_64/mingw32-cpp-<version>.el8.x86_64.rpm 
+$ sudo rpm -i /home/timvdm/rpmbuild/RPMS/x86_64/mingw32-gcc-<version>.el8.x86_64.rpm
+$ sudo rpm -i /home/timvdm/rpmbuild/RPMS/x86_64/mingw32-gcc-c++-<version>.el8.x86_64.rpm
+$ sudo rpm -i /home/timvdm/rpmbuild/RPMS/x86_64/mingw64-cpp-<version>.el8.x86_64.rpm 
+$ sudo rpm -i /home/timvdm/rpmbuild/RPMS/x86_64/mingw64-gcc-<version>.el8.x86_64.rpm
+$ sudo rpm -i /home/timvdm/rpmbuild/RPMS/x86_64/mingw64-gcc-c++-<version>.el8.x86_64.rpm
+
+Step 3: Continue Building Packages
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Continue building/installing packages in this order: 
+
+- mingw-win-iconv
+- mingw-termcap
+- mingw-gettext
+- mingw-pkg-config
+- mingw-zlib
+- mingw-openssl
