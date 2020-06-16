@@ -1,0 +1,12 @@
+diff -rupN --no-dereference PyQt5-5.13.2/configure.py PyQt5-5.13.2-new/configure.py
+--- PyQt5-5.13.2/configure.py	2019-11-02 19:54:01.000000000 +0100
++++ PyQt5-5.13.2-new/configure.py	2019-11-05 13:58:20.746612416 +0100
+@@ -2651,7 +2651,7 @@ def generate_sip_module_code(target_conf
+                 os.path.join('QtCore', 'qpycore_post_init.cpp'))
+ 
+         for line in in_f:
+-            line = line.replace('@@PYQT_SIP_FLAGS@@', ' '.join(sip_flags))
++            line = line.replace('@@PYQT_SIP_FLAGS@@', ' '.join(sip_flags).replace("WS_X11", "WS_WIN"))
+             out_f.write(line)
+ 
+         in_f.close()

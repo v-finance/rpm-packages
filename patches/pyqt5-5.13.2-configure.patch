@@ -1,0 +1,77 @@
+diff -rupN --no-dereference PyQt5-5.13.2/configure.py PyQt5-5.13.2-new/configure.py
+--- PyQt5-5.13.2/configure.py	2019-11-05 13:58:20.809612230 +0100
++++ PyQt5-5.13.2-new/configure.py	2019-11-05 13:58:20.812612222 +0100
+@@ -506,7 +506,7 @@ class TargetConfiguration:
+         self.py_inc_dir = py_config.inc_dir
+         self.py_venv_inc_dir = py_config.venv_inc_dir
+         self.py_lib_dir = py_config.lib_dir
+-        self.py_platform = py_config.platform
++        self.py_platform = 'win32-g++'
+         self.py_version = py_config.version
+         self.pyqt_bin_dir = py_config.bin_dir
+         self.pyqt_module_dir = py_config.module_dir
+@@ -996,7 +996,7 @@ class TargetConfiguration:
+         # it where it is.
+         if not self.static:
+             pro_lines.extend(['win32 {',
+-                    '    LIBS += ' + self.get_pylib_link_arguments(name=False),
++                    '    LIBS += ' + self.get_pylib_link_arguments(name=True),
+                     '}'])
+ 
+     def using_sip5(self):
+@@ -1398,8 +1398,8 @@ def check_5_1_modules(target_config, dis
+             'qsensor.h', 'new QSensor(QByteArray())')
+     check_module(target_config, disabled_modules, verbose, 'QtSerialPort',
+             'qserialport.h', 'new QSerialPort()')
+-    check_module(target_config, disabled_modules, verbose, 'QtX11Extras',
+-            'QX11Info', 'QX11Info::display()')
++    #check_module(target_config, disabled_modules, verbose, 'QtX11Extras',
++    #        'QX11Info', 'QX11Info::display()')
+ 
+ 
+ def check_5_2_modules(target_config, disabled_modules, verbose):
+@@ -1905,7 +1905,7 @@ def pro_sources(src_dir, other_headers=N
+ def module_file_name(target_config, name):
+     """ Return the name of a file implementing a module. """
+ 
+-    if sys.platform == 'win32':
++    if True:
+         fs = '{}.lib' if target_config.static else '{}.pyd'
+     else:
+         fs = 'lib{}.a' if target_config.static else '{}.so'
+@@ -2121,11 +2121,11 @@ def run_make(target_config, verbose, exe
+ 
+     # Guess the name of make and set the default target and platform specific
+     # name of the executable.
+-    if target_config.py_platform == 'win32':
+-        if target_config.qmake_spec == 'win32-g++':
+-            make = 'mingw32-make'
+-        else:
++    if target_config.py_platform.startswith('win32'):
++        if target_config.qmake_spec.startswith('win32-msvc'):
+             make = 'nmake'
++        else:
++            make = 'make'
+ 
+         if target_config.debug:
+             makefile_target = 'debug'
+@@ -2398,6 +2398,19 @@ def compile_test_program(target_config,
+ 
+     metadata = MODULE_METADATA[mname]
+ 
++    # Create a host configuration to run test programs
++    target_config = TargetConfiguration()
++    py_major = target_config.py_version >> 16
++    py_minor = (target_config.py_version >> 8) & 0x0ff
++    pyver = '%d.%d%s' % (py_major, py_minor, getattr(sys, 'abiflags', ''))
++    target_config.qmake = "qmake-qt5"
++    target_config.qmake_spec = "linux-g++"
++    target_config.py_platform = "linux"
++    target_config.qmake_variables = ""
++    target_config.sip = "/usr/bin/sip"
++    target_config.sip_inc_dir = "/usr/include/python%s/" % pyver
++    target_config.py_inc_dir = "/usr/include/python%s/" % pyver
++
+     # The derived file names.
+     name = 'cfgtest_' + mname
+     name_pro = name + '.pro'

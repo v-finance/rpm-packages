@@ -5,9 +5,9 @@
 %global mingw_build_win64 0
 
 # upstream version
-%global major_version	4
-%global minor_version	19
-%global patch_version	22
+%global major_version	5
+%global minor_version	13
+%global patch_version	2
 # RPM package release version
 %global release_version	1
 
@@ -19,9 +19,10 @@
 
 Version: %{major_version}.%{minor_version}.%{patch_version}
 
-%global archive_file 	sip-%{version}.tar.gz
-%global archive_url 	https://www.riverbankcomputing.com/static/Downloads/sip/%{version}/%{archive_file}
-%global archive_dir 	sip-%{version}
+# use version 5.13.2 for now...
+%global archive_file 	PyQt5-5.13.2.tar.gz
+%global archive_url 	https://www.riverbankcomputing.com/static/Downloads/PyQt5/5.13.2/%{archive_file}
+%global archive_dir 	PyQt5-5.13.2
 
 %global arch_triplet	%(i686-w64-mingw32-gcc -dumpmachine)
 %global install_dir 	/vortex/%{arch_triplet}/%{bundle_name}
@@ -39,10 +40,10 @@ Version: %{major_version}.%{minor_version}.%{patch_version}
 # Top-level metadata
 # ==================
 
-Name: vortex-%{bundle_name}-mingw-sip
-Summary: SIP - Python/C++ Bindings Generator
-URL: http://www.riverbankcomputing.com/software/sip/intro
-License: GPLv2 or GPLv3 and (GPLv3+ with exceptions)
+Name: vortex-%{bundle_name}-mingw-pyqt5
+Summary: Python Bindings for Qt5
+URL: http://www.riverbankcomputing.com/software/pyqt/intro
+License: GPLv3
 
 Release: %{release_version}%{?dist}
 
@@ -52,9 +53,7 @@ Release: %{release_version}%{?dist}
 
 BuildRequires: mingw32-gcc-c++
 BuildRequires: sed
-BuildRequires: vortex-%{bundle_name}-mingw32-python3
-BuildRequires: vortex-%{bundle_name}-mingw32-qt5
-BuildRequires: vortex-%{bundle_name}-mingw32-qt5-tools
+BuildRequires: vortex-%{bundle_name}-mingw-sip
 
 
 # =======================
@@ -64,21 +63,25 @@ BuildRequires: vortex-%{bundle_name}-mingw32-qt5-tools
 %undefine _disable_source_fetch
 Source0: %{archive_url}
 
-Source1: mingw-win32-g++
-
-%if "%{version}" == "4.19.22"
-Patch0: sip-4.19.22-configure.patch
+# Qt 5.15.0 methods:
+# - void setDocumentXmpMetadata(const QByteArray &xmpMetadata);
+# - QByteArray documentXmpMetadata() const;
+# - void addFileAttachment(const QString &fileName, const QByteArray &data, const QString &mimeType = QString());
+%if "%{version}" == "5.13.2"
+Patch0: pyqt5-5.13.2-qcoremod.patch
+Patch1: pyqt5-5.13.2-qpdfwriter.patch
+Patch2: pyqt5-5.13.2-configure.patch
+Patch3: pyqt5-5.13.2-wswin.patch
 %endif
 
 # ==========================================
 # Descriptions, and metadata for subpackages
 # ==========================================
 
-Requires: vortex-%{bundle_name}-mingw32-python3
-Requires: vortex-%{bundle_name}-mingw32-qt5
+Requires: vortex-%{bundle_name}-mingw-sip
 
 %description
-Custom Vortex sip build.
+Custom Vortex PyQt5 build.
 
 # ======================================================
 # The prep phase of the build:
@@ -89,10 +92,11 @@ rm -rf %{archive_dir}
 tar zxvf %{_topdir}/SOURCES/%{archive_file}
 cd %{archive_dir}
 
-cp -a %{SOURCE1} specs/mingw-win32-g++
-
-%if "%{version}" == "4.19.22"
-%patch0 -p1 -b .backup
+%if "%{version}" == "5.13.2"
+%patch0 -p0 -b .backup
+%patch1 -p1 -b .backup
+%patch2 -p1 -b .backup
+%patch3 -p1 -b .backup
 %endif
 
 # ======================================================
@@ -100,43 +104,52 @@ cp -a %{SOURCE1} specs/mingw-win32-g++
 # ======================================================
 
 %build
+cd %{archive_dir}
+
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:%{host_install_dir}/lib"
 # determine python version (e.g. 3.4)
 %global python_version $(%{host_install_dir}/bin/python3 -c 'import sys; print("{}.{}".format(sys.version_info.major, sys.version_info.minor))')
 # determine python short version (e.g. 34)
 %global python_short_version $(%{host_install_dir}/bin/python3 -c 'import sys; print("{}{}".format(sys.version_info.major, sys.version_info.minor))')
 
-function genConfig() {
-    target=$1
-    pyver=$2
-    cat > ${target}_${pyver}.host.config <<EOF
-py_inc_dir=%{install_dir}/include/python$pyver
+# create config.txt file
+cat > config.txt << EOF
+py_platform=win32-g++
+py_inc_dir=%{install_dir}/include/python%{python_version}
 py_pylib_dir=%{install_dir}/lib
-sip_bin_dir=%{install_dir}/bin
-sip_module_dir=%{install_dir}/bin
+py_pylib_lib=python%{python_short_version}
+qt_shared=True
+
+[Qt 5.15]
 EOF
-    echo ${target}_${pyver}.host.config
-}
 
-cd %{archive_dir}
 
-mkdir build_mingw32
-pushd build_mingw32
+echo "config.txt:"
+cat config.txt
 
-LD_LIBRARY_PATH=%{host_install_dir}/lib %{host_install_dir}/bin/python3 ../configure.py \
-        --use-qmake \
+echo "install_dir:    	%{install_dir}"
+echo "python_version: 	%{python_version}"
+echo "python_sitedir: 	%{python_sitedir}"
+echo "python_incdir: 	%{python_incdir}"
+
+# Configure
+%{host_install_dir}/bin/python3 configure.py \
+	--verbose \
+	--confirm-license \
 	--no-dist-info \
 	--no-stubs \
+	--no-sip-files \
+	--target-py-version=%{python_version} \
+	--qmake %{qt5_qmake} \
+	--sip %{host_install_dir}/bin/sip \
+	--configuration=config.txt \
+	-b %{install_dir}/bin \
 	-d %{install_dir}/lib/python%{python_version}/site-packages \
-        -p mingw-win32-g++ \
-        --configuration=`genConfig %{mingw32_target} %{python_version}`
+	QMAKE_CXXFLAGS+=-D_hypot=hypot
 
-%{qt5_qmake}
 
+# Build using make
 %mingw32_make %{?_smp_mflags}
-
-popd
-
 
 # ======================================================
 # Installing the built code:
@@ -145,10 +158,8 @@ popd
 %install
 rm -rf $RPM_BUILD_ROOT
 cd %{archive_dir}
+make INSTALL_ROOT=%{buildroot} INSTALL="install -p" install
 
-pushd build_mingw32
-%mingw32_make INSTALL_ROOT=%{buildroot} INSTALL="install -p" install
-popd
 
 %files
 # include all files for now
