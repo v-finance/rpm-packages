@@ -3,7 +3,7 @@
 %global minor_version	15
 %global patch_version	0
 # RPM package release version
-%global release_version	2
+%global release_version	3
 
 # bundle name
 %global bundle_name	%{getenv:VORTEX_BUNDLE}
@@ -28,9 +28,9 @@
 # qtactiveqt		compiles
 # qtscript		compiles
 # qtmultimedia
-# qttools
+# qttools		included
 # qtxmlpatterns
-# qttranslations
+# qttranslations	included
 # qtdoc
 # qtrepotools
 # qtqa
@@ -71,7 +71,7 @@
 # qtlottie
 # qtquicktimeline
 # qtquick3d
-%global	module_subset	qtbase,qtimageformats
+%global	module_subset	qtbase,qtimageformats,qttools,qttranslations
 
 # uncomment these to build examples and/or tests
 #%%global examples 1
