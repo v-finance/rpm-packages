@@ -1,6 +1,16 @@
---- configure.py	2020-04-02 19:20:14.000000000 +0200
-+++ ../configure.py	2020-05-21 12:40:02.264443715 +0200
-@@ -406,7 +406,7 @@
+diff --git a/configure.py b/configure.py
+index 35fc985..b797853 100644
+--- a/configure.py
++++ b/configure.py
+@@ -376,6 +376,7 @@ def create_makefiles(macros):
+     if opts.use_qmake:
+         sipconfig.inform("Creating sip code generator .pro file...")
+ 
++        os.makedirs("sipgen")
+         pro = open(os.path.join("sipgen", "sipgen.pro"), "w")
+ 
+         pro.write("TEMPLATE = app\n")
+@@ -406,7 +407,7 @@ def create_makefiles(macros):
              # There will only be one element.
              files, path = gen_installs[0]
              pro.write("\n")
@@ -9,3 +19,29 @@
              pro.write("sip_h.path = %s\n" % quote(path))
              pro.write("INSTALLS += sip_h\n")
  
+@@ -444,7 +445,7 @@ def create_makefiles(macros):
+     all_installs.extend(module_installs)
+ 
+     if not opts.no_module:
+-        if sys.platform == 'win32':
++        if 'win' in build_platform:
+             mod = 'sip.lib' if opts.static else 'sip.pyd'
+         else:
+             mod = 'libsip.a' if opts.static else 'sip.so'
+@@ -454,6 +455,7 @@ def create_makefiles(macros):
+     if opts.use_qmake:
+         sipconfig.inform("Creating sip module .pro file...")
+ 
++        os.makedirs("siplib")
+         pro = open(os.path.join("siplib", "siplib.pro"), "w")
+ 
+         pro.write("TEMPLATE = lib\n")
+@@ -483,7 +485,7 @@ def create_makefiles(macros):
+         if not opts.static:
+             # These only need to be correct for Windows.
+             debug_suffix = "_d" if opts.debug else ""
+-            link_lib_dir = quote("-L" + cfg.py_lib_dir)
++            link_lib_dir = quote("-L" + cfg.py_lib_dir) + " " + quote("-lpython34")
+ 
+             pro.write("""
+ win32 {
