@@ -9,7 +9,7 @@
 %global minor_version	15
 %global patch_version	0
 # RPM package release version
-%global release_version	1
+%global release_version	2
 
 # bundle name
 %global bundle_name	%{getenv:VORTEX_BUNDLE}
@@ -29,7 +29,7 @@
 %global arch_triplet	%(i686-w64-mingw32-gcc -dumpmachine)
 %global install_dir 	/vortex/%{arch_triplet}/%{bundle_name}
 
-%global	module_subset	qtbase,qtimageformats
+%global	module_subset	qtbase,qtimageformats,qttools,qttranslations
 
 # uncomment these to build examples and/or tests
 #%%global examples 1
@@ -163,6 +163,7 @@ sed -i "s|#\!/usr/bin/python|#\!/usr/bin/python3|g" %{buildroot}%{install_archda
 %{install_dir}/bin/Qt5Core.dll
 %{install_dir}/bin/Qt5DBus.dll
 %{install_dir}/bin/Qt5Gui.dll
+%{install_dir}/bin/Qt5Help.dll
 %{install_dir}/bin/Qt5Network.dll
 %{install_dir}/bin/Qt5OpenGL.dll
 %{install_dir}/bin/Qt5PrintSupport.dll
@@ -174,21 +175,42 @@ sed -i "s|#\!/usr/bin/python|#\!/usr/bin/python3|g" %{buildroot}%{install_archda
 %{install_dir}/lib
 %{install_dir}/share
 
+
+
+
+
+
 %files -n vortex-%{bundle_name}-mingw32-qt5-tools
 %dir %{install_dir}/bin
 %{install_dir}/bin/fixqt4headers.pl
-%{install_dir}/bin/syncqt.pl
+%{install_dir}/bin/lconvert
+%{install_dir}/bin/lprodump
+%{install_dir}/bin/lrelease
+%{install_dir}/bin/lrelease-pro
+%{install_dir}/bin/lupdate
+%{install_dir}/bin/lupdate-pro
 %{install_dir}/bin/moc
+%{install_dir}/bin/qdbus.exe
 %{install_dir}/bin/qdbuscpp2xml
+%{install_dir}/bin/qdbusviewer.exe
 %{install_dir}/bin/qdbusxml2cpp
 %{install_dir}/bin/qlalr
 %{install_dir}/bin/qmake
+%{install_dir}/bin/qtattributionsscanner
+%{install_dir}/bin/qtdiag.exe
+%{install_dir}/bin/qtpaths.exe
+%{install_dir}/bin/qtplugininfo.exe
 %{install_dir}/bin/qvkgen
 %{install_dir}/bin/rcc
+%{install_dir}/bin/syncqt.pl
 %{install_dir}/bin/tracegen
 %{install_dir}/bin/uic
+%{install_dir}/bin/windeployqt
 
 
 %changelog
+* Wed Jun 17 2020 tim.vandermeersch@vortex-financials.be
+- Release 2
+- Include qttools & qttranslations
 * Tue Jun 02 2020 tim.vandermeersch@vortex-financials.be
 - Initial release
