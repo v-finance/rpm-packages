@@ -9,7 +9,7 @@
 %global minor_version	19
 %global patch_version	22
 # RPM package release version
-%global release_version	2
+%global release_version	3
 
 # bundle name
 %global bundle_name	%{getenv:VORTEX_BUNDLE}
@@ -113,7 +113,7 @@ function genConfig() {
 py_inc_dir=%{install_dir}/include/python$pyver
 py_pylib_dir=%{install_dir}/lib
 sip_bin_dir=%{install_dir}/bin
-sip_module_dir=%{install_dir}/bin
+sip_module_dir=%{install_dir}/lib/python%{python_version}/site-packages
 EOF
     echo ${target}_${pyver}.host.config
 }
@@ -127,6 +127,7 @@ LD_LIBRARY_PATH=%{host_install_dir}/lib %{host_install_dir}/bin/python3 ../confi
         --use-qmake \
 	--no-dist-info \
 	--no-stubs \
+        --sip-module=PyQt5.sip \
 	-d %{install_dir}/lib/python%{python_version}/site-packages \
         -p mingw-win32-g++ \
         --configuration=`genConfig %{mingw32_target} %{python_version}`
@@ -157,6 +158,9 @@ popd
 
 
 %changelog
+* Wed Jun 17 2020 tim.vandermeersch@vortex-financials.be
+- Release 3
+- Add --sip-module=PyQt5.sip
 * Wed Jun 17 2020 tim.vandermeersch@vortex-financials.be
 - Release 2
 - Use mingw32 as package name for consistency
