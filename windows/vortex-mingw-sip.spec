@@ -9,7 +9,7 @@
 %global minor_version	19
 %global patch_version	22
 # RPM package release version
-%global release_version	1
+%global release_version	2
 
 # bundle name
 %global bundle_name	%{getenv:VORTEX_BUNDLE}
@@ -39,7 +39,7 @@ Version: %{major_version}.%{minor_version}.%{patch_version}
 # Top-level metadata
 # ==================
 
-Name: vortex-%{bundle_name}-mingw-sip
+Name: vortex-%{bundle_name}-mingw32-sip
 Summary: SIP - Python/C++ Bindings Generator
 URL: http://www.riverbankcomputing.com/software/sip/intro
 License: GPLv2 or GPLv3 and (GPLv3+ with exceptions)
@@ -157,5 +157,8 @@ popd
 
 
 %changelog
+* Wed Jun 17 2020 tim.vandermeersch@vortex-financials.be
+- Release 2
+- Use mingw32 as package name for consistency
 * Tue Jun 16 2020 tim.vandermeersch@vortex-financials.be
 - Initial version
