@@ -9,7 +9,7 @@
 %global minor_version	13
 %global patch_version	2
 # RPM package release version
-%global release_version	1
+%global release_version	2
 
 # bundle name
 %global bundle_name	%{getenv:VORTEX_BUNDLE}
@@ -40,7 +40,7 @@ Version: %{major_version}.%{minor_version}.%{patch_version}
 # Top-level metadata
 # ==================
 
-Name: vortex-%{bundle_name}-mingw-pyqt5
+Name: vortex-%{bundle_name}-mingw32-pyqt5
 Summary: Python Bindings for Qt5
 URL: http://www.riverbankcomputing.com/software/pyqt/intro
 License: GPLv3
@@ -53,7 +53,7 @@ Release: %{release_version}%{?dist}
 
 BuildRequires: mingw32-gcc-c++
 BuildRequires: sed
-BuildRequires: vortex-%{bundle_name}-mingw-sip
+BuildRequires: vortex-%{bundle_name}-mingw32-sip
 
 
 # =======================
@@ -78,7 +78,7 @@ Patch3: pyqt5-5.13.2-wswin.patch
 # Descriptions, and metadata for subpackages
 # ==========================================
 
-Requires: vortex-%{bundle_name}-mingw-sip
+Requires: vortex-%{bundle_name}-mingw32-sip
 
 %description
 Custom Vortex PyQt5 build.
@@ -139,6 +139,8 @@ echo "python_incdir: 	%{python_incdir}"
 	--no-dist-info \
 	--no-stubs \
 	--no-sip-files \
+	--disable-feature=sqlmodel \
+	--disable=QtSql \
 	--target-py-version=%{python_version} \
 	--qmake %{qt5_qmake} \
 	--sip %{host_install_dir}/bin/sip \
@@ -168,5 +170,8 @@ make INSTALL_ROOT=%{buildroot} INSTALL="install -p" install
 
 
 %changelog
+* Wed Jun 17 2020 tim.vandermeersch@vortex-financials.be
+- Release 2
+- Use mingw32 as package name for consistency
 * Tue Jun 16 2020 tim.vandermeersch@vortex-financials.be
 - Initial version
