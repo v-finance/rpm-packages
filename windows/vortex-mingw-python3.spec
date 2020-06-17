@@ -3,7 +3,7 @@
 %global minor_version	4
 %global patch_version	4
 # RPM package release version
-%global release_version	1
+%global release_version	2
 
 # bundle name
 %global bundle_name	%{getenv:VORTEX_BUNDLE}
@@ -73,27 +73,34 @@ Repackaged python 3.4.4 for mingw
 # ======================================================
 
 %install
+# binaries & dll files
 mkdir -p %{buildroot}%{install_dir}/bin
-install python34.dll %{buildroot}%{install_dir}/bin
 install python.exe %{buildroot}%{install_dir}/bin
 install pythonw.exe %{buildroot}%{install_dir}/bin
+install python34.dll %{buildroot}%{install_dir}/bin
 install DLLs/python3.dll %{buildroot}%{install_dir}/bin
-install DLLs/*.pyd %{buildroot}%{install_dir}/bin
+install DLLs/sqlite3.dll %{buildroot}%{install_dir}/bin
 
+# include files
 mkdir -p %{buildroot}%{install_dir}/include/python3.4
 install -m 644 include/*.h %{buildroot}%{install_dir}/include/python3.4
 
+# python modules
 mkdir -p %{buildroot}%{install_dir}/lib/python3.4
 cp -r Lib/* %{buildroot}%{install_dir}/lib/python3.4
+install DLLs/*.pyd %{buildroot}%{install_dir}/lib/python3.4
 
+# lib files
 install libs/*.lib %{buildroot}%{install_dir}/lib
-
-
 
 
 %files
 %{install_dir}
 
 %changelog
+* Wed Jun 17 2020 tim.vandermeersch@vortex-financials.be
+- Release 2
+- Include sqlite3.dll
+- Put .pyd files in lib/python3.4
 * Tue Jun 02 2020 tim.vandermeersch@vortex-financials.be
 - Initial release
