@@ -3,7 +3,7 @@
 %global minor_version	4
 %global patch_version	4
 # RPM package release version
-%global release_version	1
+%global release_version	2
 
 # bundle name
 %global bundle_name	%{getenv:VORTEX_BUNDLE}
@@ -122,7 +122,6 @@ Source0: https://github.com/tim-vdm/cpython/archive/%{archive_file}
 
 Requires: vortex-%{bundle_name}-openssl
 
-Provides: %{install_dir}/bin/python
 
 %description
 Custom Vortex python build.
@@ -154,7 +153,12 @@ export VORTEX_BUNDLE_ROOT=%{install_dir}
   --enable-loadable-sqlite-extensions \
   --with-dtrace \
   --with-lto \
-  --with-ssl-default-suites=openssl
+  --with-ssl-default-suites=openssl \
+  --with-ensurepip=no \
+  LDFLAGS=-Wl,-rpath='%{install_dir}/lib'
+
+#LDFLAGS="-Wl,-rpath,'\$\$ORIGIN/../lib' -Wl,-z,origin"
+
 
 %make_build
 
@@ -170,18 +174,18 @@ export VORTEX_BUNDLE_ROOT=%{install_dir}
 make DESTDIR=%{buildroot} INSTALL="install -p" install
 
 %global pybasever %{major_version}.%{minor_version}
-# Make sure the BUILDROOT is not part of any file (for buildrpm's check-buildroot)
-sed -i "s|%{buildroot}||g" %{buildroot}%{install_dir}/lib/python%{pybasever}/site-packages/setuptools-18.2.dist-info/RECORD
-sed -i "s|%{buildroot}||g" %{buildroot}%{install_dir}/lib/python%{pybasever}/site-packages/pip-7.1.2.dist-info/RECORD
 
 # Fix shebangs before buildrpm's brp-mangle-shebangs changes them to the system's python
 find %{buildroot} -type f -exec sed -i "s|#\!/usr/bin/env python3|#\!%{install_dir}/bin/python3|g" {} \;
 find %{buildroot} -type f -exec sed -i "s|#\! /usr/bin/env python3|#\!%{install_dir}/bin/python3|g" {} \;
-find %{buildroot} -type f -exec sed -i "s|#\! /usr/local/bin/python|#\!%{install_dir}/bin/python|g" {} \;
+find %{buildroot} -type f -exec sed -i "s|#\! /usr/local/bin/python|#\!%{install_dir}/bin/python3|g" {} \;
 sed -i "s|#\!/usr/bin/env python|#\!%{install_dir}/bin/python3|g" %{buildroot}%{install_dir}/lib/python%{pybasever}/encodings/rot_13.py
 sed -i "s|#\!/usr/bin/env python|#\!%{install_dir}/bin/python3|g" %{buildroot}%{install_dir}/lib/python%{pybasever}/lib2to3/tests/data/different_encoding.py
 sed -i "s|#\!/usr/bin/env python|#\!%{install_dir}/bin/python3|g" %{buildroot}%{install_dir}/lib/python%{pybasever}/lib2to3/tests/data/false_encoding.py
 
+%post
+# Install pip
+%{install_dir}/bin/python3 -m ensurepip
 
 %postun
 # remove files installed by pip packages etc.
@@ -194,6 +198,8 @@ rm -rf %{install_dir}/lib/python%{pybasever}
 
 
 %changelog
+* Mon Jun 22 2020 tim.vandermeersch@vortex-financials.be
+- Do not install pip during build (this was not working when the package was already installed).
 * Tue May 26 2020 tim.vandermeersch@vortex-financials.be
 - Use bundle name
 * Tue May 19 2020 tim.vandermeersch@vortex-financials.be

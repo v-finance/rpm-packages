@@ -77,7 +77,7 @@ def build_package(ctx, package):
     # make sure the $HOME/rpmbuild directories exist
     ctx.run("rpmdev-setuptree")
     copy_patches()
-    ctx.run("rpmbuild -bb {}".format(get_spec_path(package)))
+    ctx.run("QA_RPATHS=$(( 0x0002 )) rpmbuild -bb {}".format(get_spec_path(package)))
 
 @task
 def build_source_package(ctx, package):
