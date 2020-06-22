@@ -80,6 +80,30 @@ For example:
 $ VORTEX_BUNDLE=feature-freeze invoke build-package vortex-python3
 
 
+Updating the RPM Repository repodata
+====================================
+
+The packages are distributed using RPM repositories. The actual RPM binary files
+are hosted on github as files associated with a specific release. To update a
+package in the RPM repository, a new release for the rpm-packages github
+repository should be made. The RPM files can be attached to this release as
+downloadable assets.
+
+Next, the RPM repository metadata should be updated. 
+
+$ cd rpm-repository/vortex
+
+Here, we assume that the rpm packages uploaded to github are placed in the
+current (rpm-repository/vortex) directory. When running the createrepo command,
+a baseurl pointing to the github release should be used:
+
+$ createrepo --baseurl https://github.com/v-finance/rpm-packages/releases/download/<github_release>/ .
+
+Replace <github_release> with the name used for the release on github and commit
+the changes overwritting the previous repodata. You will now be able to install
+the new version using yum/dnf.
+
+
 MinGW Packages for Cross-Compilation
 ====================================
 
