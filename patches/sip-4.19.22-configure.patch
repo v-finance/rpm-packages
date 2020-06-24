@@ -2,11 +2,12 @@ diff --git a/configure.py b/configure.py
 index 35fc985..b797853 100644
 --- a/configure.py
 +++ b/configure.py
-@@ -376,6 +376,7 @@ def create_makefiles(macros):
+@@ -376,6 +376,8 @@ def create_makefiles(macros):
      if opts.use_qmake:
          sipconfig.inform("Creating sip code generator .pro file...")
  
-+        os.makedirs("sipgen")
++        if not os.path.isdir("sipgen"):
++            os.makedirs("sipgen")
          pro = open(os.path.join("sipgen", "sipgen.pro"), "w")
  
          pro.write("TEMPLATE = app\n")
@@ -28,11 +29,12 @@ index 35fc985..b797853 100644
              mod = 'sip.lib' if opts.static else 'sip.pyd'
          else:
              mod = 'libsip.a' if opts.static else 'sip.so'
-@@ -454,6 +455,7 @@ def create_makefiles(macros):
+@@ -454,6 +455,8 @@ def create_makefiles(macros):
      if opts.use_qmake:
          sipconfig.inform("Creating sip module .pro file...")
  
-+        os.makedirs("siplib")
++        if not os.path.isdir("siplib"):
++            os.makedirs("siplib")
          pro = open(os.path.join("siplib", "siplib.pro"), "w")
  
          pro.write("TEMPLATE = lib\n")
