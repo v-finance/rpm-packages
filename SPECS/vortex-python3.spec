@@ -3,7 +3,7 @@
 %global minor_version	4
 %global patch_version	4
 # RPM package release version
-%global release_version	2
+%global release_version	3
 
 # bundle name
 %global bundle_name	%{getenv:VORTEX_BUNDLE}
@@ -155,9 +155,7 @@ export VORTEX_BUNDLE_ROOT=%{install_dir}
   --with-lto \
   --with-ssl-default-suites=openssl \
   --with-ensurepip=no \
-  LDFLAGS=-Wl,-rpath='%{install_dir}/lib'
-
-#LDFLAGS="-Wl,-rpath,'\$\$ORIGIN/../lib' -Wl,-z,origin"
+  LDFLAGS='-Wl,-rpath=\$$ORIGIN/../lib'
 
 
 %make_build
