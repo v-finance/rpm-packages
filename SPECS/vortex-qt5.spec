@@ -3,7 +3,7 @@
 %global minor_version	15
 %global patch_version	0
 # RPM package release version
-%global release_version	3
+%global release_version	4
 
 # bundle name
 %global bundle_name	%{getenv:VORTEX_BUNDLE}
@@ -219,7 +219,7 @@ cd qt5-build
 	%{?sqlite} \
 	%{?pcre} \
   	-no-pch \
-	-no-rpath \
+	-rpath
 	-no-separate-debug-info \
 	-no-strip \
 	-system-libjpeg \
