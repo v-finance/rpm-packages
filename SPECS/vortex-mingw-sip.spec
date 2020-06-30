@@ -52,6 +52,7 @@ Release: %{release_version}%{?dist}
 
 BuildRequires: mingw32-gcc-c++
 BuildRequires: sed
+BuildRequires: vortex-%{bundle_name}-sip
 BuildRequires: vortex-%{bundle_name}-mingw32-python3
 BuildRequires: vortex-%{bundle_name}-mingw32-qt5
 BuildRequires: vortex-%{bundle_name}-mingw32-qt5-tools
