@@ -219,7 +219,7 @@ cd qt5-build
 	%{?sqlite} \
 	%{?pcre} \
   	-no-pch \
-	-rpath
+	-rpath \
 	-no-separate-debug-info \
 	-no-strip \
 	-system-libjpeg \
