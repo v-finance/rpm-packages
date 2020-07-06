@@ -205,6 +205,8 @@ def mock_build_package(ctx, package):
     Build a RPM packages using mock. This does not require root privileges
     but the user needs to be in the mock group.
     """
+    # make sure the $HOME/rpmbuild directories exist
+    ctx.run("rpmdev-setuptree")
     # delete old source RPMs
     ctx.run("rm ~/rpmbuild/SRPMS/*")
     # rebuild all source RPMs
