@@ -1,5 +1,7 @@
 from invoke import task
+import shutil
 import os
+
 
 def get_specs_dir():
     """
@@ -50,7 +52,7 @@ def list_packages(ctx):
 @task
 def install_build_deps(ctx, package):
     """
-    Install the build dependencies for a package.
+    Install the build dependencies for a package. Requires sudo.
     """
     if package not in get_packages():
         print("Package {} not found. Available packages:".format(package))
@@ -58,12 +60,11 @@ def install_build_deps(ctx, package):
         return
 
     print("Installing build dependencies for package {}".format(package))
-    # FIXME: Get rid of sudo using mock?
     ctx.run("sudo dnf -y builddep {}".format(get_spec_path(package)))
 
 
-@task
-def build_package(ctx, package):
+@task(optional=['bundle_name'])
+def build_package(ctx, package, bundle_name='stable'):
     """
     Build the RPM package.
     """
@@ -77,7 +78,15 @@ def build_package(ctx, package):
     # make sure the $HOME/rpmbuild directories exist
     ctx.run("rpmdev-setuptree")
     copy_patches()
-    ctx.run("QA_RPATHS=$(( 0x0002 )) rpmbuild -bb {}".format(get_spec_path(package)))
+
+    # output RPM to rpms/<package_name> directory
+    rpms_dir = os.path.join('rpms', bundle_name, package)
+    if os.path.isdir(rpms_dir):
+        shutil.rmtree(rpms_dir)
+    os.makedirs(rpms_dir)
+
+    ctx.run("QA_RPATHS=$(( 0x0002 )) VORTEX_BUNDLE_NAME={} rpmbuild --define \"_rpmdir {}\" -bb {}".format(bundle_name, rpms_dir, get_spec_path(package)))
+
 
 @task
 def build_source_package(ctx, package):
@@ -190,3 +199,24 @@ def mock_build_packages(ctx):
     #   --enable-network    make sure we can access github
     ctx.run("mock --enable-network --recurse --chain {}".format(" ".join(packages)))
 
+@task
+def mock_build_package(ctx, package):
+    """
+    Build a RPM packages using mock. This does not require root privileges
+    but the user needs to be in the mock group.
+    """
+    # delete old source RPMs
+    ctx.run("rm ~/rpmbuild/SRPMS/*")
+    # rebuild all source RPMs
+    build_source_package(ctx, package)
+    # create list with source RPMs
+    packages = []
+    srpms_path = os.path.join(os.path.expanduser('~'), "rpmbuild/SRPMS")
+    for item in os.listdir(srpms_path):
+        if item.endswith('.src.rpm'):
+            packages.append(os.path.join(srpms_path, item))
+    # run mock with options:
+    #   --enable-network    make sure we can access github
+    cmd = "mock -r vortex-centos-8-x86_64 --enable-network {}".format(packages[0])
+    print(cmd)
+    ctx.run(cmd)
