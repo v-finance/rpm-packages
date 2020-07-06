@@ -171,7 +171,7 @@ def build_all_source_packages(ctx):
     Build all the RPM source packages.
     """
     # delete sources to ensure we have the latest version
-    ctx.run("rm ~/rpmbuild/SOURCES/*")
+    ctx.run("rm -f ~/rpmbuild/SOURCES/*")
     # build source RPMs
     for package in get_packages():
         build_source_package(ctx, package)
@@ -184,7 +184,7 @@ def mock_build_packages(ctx):
     but the user needs to be in the mock group.
     """
     # delete old source RPMs
-    ctx.run("rm ~/rpmbuild/SRPMS/*")
+    ctx.run("rm -f ~/rpmbuild/SRPMS/*")
     # rebuild all source RPMs
     build_all_source_packages(ctx)
     # create list with source RPMs
@@ -208,7 +208,7 @@ def mock_build_package(ctx, package):
     # make sure the $HOME/rpmbuild directories exist
     ctx.run("rpmdev-setuptree")
     # delete old source RPMs
-    ctx.run("rm ~/rpmbuild/SRPMS/*")
+    ctx.run("rm -f ~/rpmbuild/SRPMS/*")
     # rebuild all source RPMs
     build_source_package(ctx, package)
     # create list with source RPMs
