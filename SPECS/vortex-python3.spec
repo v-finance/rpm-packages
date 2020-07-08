@@ -1,18 +1,32 @@
-# upstream version
-%global major_version	3
-%global minor_version	4
-%global patch_version	4
-# RPM package release version
-%global release_version	3
-
 # bundle name
 %global bundle_name	%{getenv:VORTEX_BUNDLE}
 %if "%{bundle_name}" == ""
 %global bundle_name	stable
 %endif
 
+
+%if "%{bundle_name}" == "stable"
+# upstream version
+%global major_version	3
+%global minor_version	4
+%global patch_version	4
+# RPM package release version
+%global release_version	3
+%endif
+
+%if "%{bundle_name}" == "test"
+# upstream version
+%global major_version	3
+%global minor_version	8
+%global patch_version	3
+# RPM package release version
+%global release_version	1
+%endif
+
+Version: %{major_version}.%{minor_version}.%{patch_version}
+
 # branch name on github (e.g. https://github.com/v-finance/cpython/<branch_name>)
-%global branch_name	3.4.4-vortex
+%global branch_name	%{version}-vortex
 
 %global arch_triplet	%(gcc -dumpmachine)
 %global install_dir 	/vortex/%{arch_triplet}/%{bundle_name}
@@ -29,7 +43,6 @@ Summary: Interpreter of the Python programming language
 URL: https://www.python.org/
 License: Python
 
-Version: %{major_version}.%{minor_version}.%{patch_version}
 Release: %{release_version}%{?dist}
 
 %global archive_file %{branch_name}.tar.gz
@@ -96,7 +109,13 @@ BuildRequires: /usr/bin/dtrace
 # workaround http://bugs.python.org/issue19804 (test_uuid requires ifconfig)
 BuildRequires: /usr/sbin/ifconfig
 
+%if "%{bundle_name}" == "stable"
 BuildRequires: vortex-%{bundle_name}-openssl
+%endif
+
+%if "%{bundle_name}" == "test"
+BuildRequires: openssl-devel
+%endif
 
 #%%if %%{with rewheel}
 #BuildRequires: python3-setuptools
@@ -120,7 +139,9 @@ Source0: https://github.com/tim-vdm/cpython/archive/%{archive_file}
 # Descriptions, and metadata for subpackages
 # ==========================================
 
+%if "%{bundle_name}" == "stable"
 Requires: vortex-%{bundle_name}-openssl
+%endif
 
 
 %description
@@ -196,6 +217,8 @@ rm -rf %{install_dir}/lib/python%{pybasever}
 
 
 %changelog
+* Tue Jul 07 2020 tim.vandermeersch@vortex-financials.be
+- Add python 3.8.3 (bundle_name = test)
 * Mon Jun 22 2020 tim.vandermeersch@vortex-financials.be
 - Do not install pip during build (this was not working when the package was already installed).
 * Tue May 26 2020 tim.vandermeersch@vortex-financials.be

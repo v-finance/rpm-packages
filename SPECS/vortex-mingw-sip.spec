@@ -4,17 +4,28 @@
 # build 32-bit only
 %global mingw_build_win64 0
 
+# bundle name
+%global bundle_name	%{getenv:VORTEX_BUNDLE}
+%if "%{bundle_name}" == ""
+%global bundle_name	stable
+%endif
+
+%if "%{bundle_name}" == "stable"
 # upstream version
 %global major_version	4
 %global minor_version	19
 %global patch_version	22
 # RPM package release version
 %global release_version	3
+%endif
 
-# bundle name
-%global bundle_name	%{getenv:VORTEX_BUNDLE}
-%if "%{bundle_name}" == ""
-%global bundle_name	stable
+%if "%{bundle_name}" == "test"
+# upstream version
+%global major_version	4
+%global minor_version	19
+%global patch_version	23
+# RPM package release version
+%global release_version	1
 %endif
 
 Version: %{major_version}.%{minor_version}.%{patch_version}
@@ -67,8 +78,11 @@ Source0: %{archive_url}
 
 Source1: mingw-win32-g++
 
-%if "%{version}" == "4.19.22"
-Patch0: sip-4.19.22-configure.patch
+%if "%{bundle_name}" == "stable"
+Patch0: sip-4.19.x-configure-python34.patch
+%endif
+%if "%{bundle_name}" == "test"
+Patch0: sip-4.19.x-configure-python38.patch
 %endif
 
 # ==========================================
@@ -92,16 +106,17 @@ cd %{archive_dir}
 
 cp -a %{SOURCE1} specs/mingw-win32-g++
 
-%if "%{version}" == "4.19.22"
 %patch0 -p1 -b .backup
-%endif
 
 # ======================================================
 # Configuring and building the code:
 # ======================================================
 
 %build
+%if "%{bundle_name}" == "stable"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:%{host_install_dir}/lib"
+%endif
+
 # determine python version (e.g. 3.4)
 %global python_version $(%{host_install_dir}/bin/python3 -c 'import sys; print("{}.{}".format(sys.version_info.major, sys.version_info.minor))')
 # determine python short version (e.g. 34)

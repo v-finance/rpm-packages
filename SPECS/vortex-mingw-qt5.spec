@@ -29,7 +29,13 @@
 %global arch_triplet	%(i686-w64-mingw32-gcc -dumpmachine)
 %global install_dir 	/vortex/%{arch_triplet}/%{bundle_name}
 
+%if "%{bundle_name}" == "stable"
 %global	module_subset	qtbase,qtimageformats,qttools,qttranslations
+%endif
+
+%if "%{bundle_name}" == "test"
+%global	module_subset	qtbase,qtimageformats,qttools,qttranslations,qtdeclarative
+%endif
 
 # uncomment these to build examples and/or tests
 #%%global examples 1
@@ -37,6 +43,9 @@
 
 
 # ================= IT SHOULD NOT BE NECESSARY TO MAKE CHANGES BELOW ==============================
+
+# Avoid duplicate build-id files between bundles
+%global _build_id_links none
 
 # ==================
 # Top-level metadata
@@ -67,6 +76,14 @@ BuildRequires:  mingw32-gettext
 BuildRequires:  mingw32-win-iconv
 BuildRequires:  mingw32-zlib
 BuildRequires:  mingw32-openssl
+
+# =======================
+# Source code and patches
+# =======================
+
+%if "%{bundle_name}" == "test"
+Patch0: qt5-5.15.0-qtdeclarative.patch
+%endif
 
 # ==========================================
 # Descriptions, and metadata for subpackages
@@ -99,19 +116,22 @@ Tools for MinGW compiled Qt5 library for the Win32 target.
 %global debug_package %{nil}
 
 %prep
+echo "bundle: %{bundle_name}"
 cd %{_topdir}/BUILD
 # remove old directories
-rm -rf qt5 qt5-build
+rm -rf qt5-mingw qt5-mingw-build
 # checkout git repository
-git clone %{github_repo} qt5
-cd qt5
+git clone %{github_repo} qt5-mingw
+cd qt5-mingw
 # checkout the correct branch
 git checkout %{branch_name}
 # initialize git submodules
 ./init-repository --module-subset=%{module_subset}
 
-# Use this to compile from targ.gz
-#%%setup -q -n qt5-%{version}
+%if "%{bundle_name}" == "test"
+cd qtdeclarative
+%patch0 -p1 -b .backup
+%endif
 
 # ======================================================
 # Configuring and building the code:
@@ -121,10 +141,13 @@ git checkout %{branch_name}
 %global install_datadir		%{install_dir}/share/qt5
 %global install_archdatadir	%{install_dir}/lib/qt5
 
-cd qt5 # needed when compiling from git
+
+cd qt5-mingw # needed when compiling from git
 
 mkdir build_win32
 pushd build_win32
+
+%if "%{bundle_name}" == "stable"
 ../configure -verbose \
 	-opensource \
 	-confirm-license \
@@ -140,9 +163,29 @@ pushd build_win32
 	-no-feature-sqlmodel \
 	-no-sql-sqlite \
 	-no-sql-odbc
+%endif
+
+%if "%{bundle_name}" == "test"
+../configure -verbose \
+	-opensource \
+	-confirm-license \
+	-release \
+	-xplatform win32-g++ \
+	-device-option CROSS_COMPILE=i686-w64-mingw32- \
+	-nomake examples \
+	-nomake tests \
+	-prefix %{install_dir} \
+	-archdatadir %{install_archdatadir} \
+	-datadir %{install_datadir} \
+	-no-opengl \
+	-no-feature-sqlmodel \
+	-no-sql-sqlite \
+	-no-sql-odbc
+%endif
 
 popd
-	
+
+alias python=python3
 %mingw_make %{?_smp_mflags}
 
 # ======================================================
@@ -150,7 +193,7 @@ popd
 # ======================================================
 
 %install
-rm -rf $RPM_BUILD_ROOT ; cd qt5 # needed when compiling from git
+rm -rf $RPM_BUILD_ROOT ; cd qt5-mingw # needed when compiling from git
 
 %mingw_make install INSTALL_ROOT=%{buildroot}
 
@@ -165,12 +208,23 @@ sed -i "s|#\!/usr/bin/python|#\!/usr/bin/python3|g" %{buildroot}%{install_archda
 %{install_dir}/bin/Qt5Gui.dll
 %{install_dir}/bin/Qt5Help.dll
 %{install_dir}/bin/Qt5Network.dll
-%{install_dir}/bin/Qt5OpenGL.dll
 %{install_dir}/bin/Qt5PrintSupport.dll
 %{install_dir}/bin/Qt5Sql.dll
 %{install_dir}/bin/Qt5Test.dll
 %{install_dir}/bin/Qt5Widgets.dll
 %{install_dir}/bin/Qt5Xml.dll
+%if "%{bundle_name}" == "stable"
+%{install_dir}/bin/Qt5OpenGL.dll
+%endif
+%if "%{bundle_name}" == "test"
+%{install_dir}/bin/Qt5Qml.dll
+%{install_dir}/bin/Qt5QmlModels.dll
+%{install_dir}/bin/Qt5QmlWorkerScript.dll
+%{install_dir}/bin/Qt5Quick.dll
+%{install_dir}/bin/Qt5QuickShapes.dll
+%{install_dir}/bin/Qt5QuickTest.dll
+%{install_dir}/bin/Qt5QuickWidgets.dll
+%endif
 %{install_dir}/include
 %{install_dir}/lib
 %{install_dir}/share
@@ -206,9 +260,22 @@ sed -i "s|#\!/usr/bin/python|#\!/usr/bin/python3|g" %{buildroot}%{install_archda
 %{install_dir}/bin/tracegen
 %{install_dir}/bin/uic
 %{install_dir}/bin/windeployqt
-
+%if "%{bundle_name}" == "test"
+%{install_dir}/bin/qml.exe
+%{install_dir}/bin/qmlcachegen
+%{install_dir}/bin/qmlformat
+%{install_dir}/bin/qmlimportscanner
+%{install_dir}/bin/qmllint
+%{install_dir}/bin/qmlmin
+%{install_dir}/bin/qmlpreview.exe
+%{install_dir}/bin/qmlscene.exe
+%{install_dir}/bin/qmltestrunner.exe
+%{install_dir}/bin/qmltyperegistrar
+%endif
 
 %changelog
+* Tue Jul 07 2020 tim.vandermeersch@vortex-financials.be
+- Add qtdeclarative module and -no-opengl (bundle_name = test)
 * Wed Jun 17 2020 tim.vandermeersch@vortex-financials.be
 - Release 2
 - Include qttools & qttranslations

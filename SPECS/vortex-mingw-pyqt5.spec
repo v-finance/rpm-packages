@@ -4,25 +4,43 @@
 # build 32-bit only
 %global mingw_build_win64 0
 
-# upstream version
-%global major_version	5
-%global minor_version	13
-%global patch_version	2
-# RPM package release version
-%global release_version	2
-
 # bundle name
 %global bundle_name	%{getenv:VORTEX_BUNDLE}
 %if "%{bundle_name}" == ""
 %global bundle_name	stable
 %endif
 
+%if "%{bundle_name}" == "stable"
+# upstream version
+%global major_version	5
+%global minor_version	13
+%global patch_version	2
+# RPM package release version
+%global release_version	2
+%endif
+
+%if "%{bundle_name}" == "test"
+# upstream version
+%global major_version	5
+%global minor_version	15
+%global patch_version	0
+# RPM package release version
+%global release_version	1
+%endif
+
 Version: %{major_version}.%{minor_version}.%{patch_version}
 
-# use version 5.13.2 for now...
+%if "%{bundle_name}" == "stable"
 %global archive_file 	PyQt5-5.13.2.tar.gz
 %global archive_url 	https://www.riverbankcomputing.com/static/Downloads/PyQt5/5.13.2/%{archive_file}
 %global archive_dir 	PyQt5-5.13.2
+%endif
+
+%if "%{bundle_name}" == "test"
+%global archive_file 	PyQt5-5.15.0.tar.gz
+%global archive_url 	https://files.pythonhosted.org/packages/8c/90/82c62bbbadcca98e8c6fa84f1a638de1ed1c89e85368241e9cc43fcbc320/%{archive_file}
+%global archive_dir 	PyQt5-5.15.0
+%endif
 
 %global arch_triplet	%(i686-w64-mingw32-gcc -dumpmachine)
 %global install_dir 	/vortex/%{arch_triplet}/%{bundle_name}
@@ -53,6 +71,7 @@ Release: %{release_version}%{?dist}
 
 BuildRequires: mingw32-gcc-c++
 BuildRequires: sed
+BuildRequires: vortex-%{bundle_name}-sip
 BuildRequires: vortex-%{bundle_name}-mingw32-sip
 
 
@@ -73,6 +92,11 @@ Patch1: pyqt5-5.13.2-qpdfwriter.patch
 Patch2: pyqt5-5.13.2-configure.patch
 Patch3: pyqt5-5.13.2-wswin.patch
 %endif
+
+%if "%{version}" == "5.15.0"
+Patch0: pyqt5-5.15.0-mingw32.patch
+%endif
+
 
 # ==========================================
 # Descriptions, and metadata for subpackages
@@ -99,6 +123,10 @@ cd %{archive_dir}
 %patch3 -p1 -b .backup
 %endif
 
+%if "%{version}" == "5.15.0"
+%patch0 -p1 -b .backup
+%endif
+
 # ======================================================
 # Configuring and building the code:
 # ======================================================
@@ -106,11 +134,16 @@ cd %{archive_dir}
 %build
 cd %{archive_dir}
 
+%if "%{bundle_name}" == "stable"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:%{host_install_dir}/lib"
+%endif
+
 # determine python version (e.g. 3.4)
 %global python_version $(%{host_install_dir}/bin/python3 -c 'import sys; print("{}.{}".format(sys.version_info.major, sys.version_info.minor))')
 # determine python short version (e.g. 34)
 %global python_short_version $(%{host_install_dir}/bin/python3 -c 'import sys; print("{}{}".format(sys.version_info.major, sys.version_info.minor))')
+
+%if "%{bundle_name}" == "stable"
 
 # create config.txt file
 cat > config.txt << EOF
@@ -122,7 +155,6 @@ qt_shared=True
 
 [Qt 5.15]
 EOF
-
 
 echo "config.txt:"
 cat config.txt
@@ -149,6 +181,41 @@ echo "python_incdir: 	%{python_incdir}"
 	-d %{install_dir}/lib/python%{python_version}/site-packages \
 	QMAKE_CXXFLAGS+=-D_hypot=hypot
 
+%endif
+
+%if "%{bundle_name}" == "test"
+
+# create config.txt file
+cat > config.txt << EOF
+py_platform=win32
+py_inc_dir=%{install_dir}/include/python%{python_version}
+py_pylib_dir=%{install_dir}/lib
+py_pylib_lib=python%{python_short_version}
+qt_shared=True
+
+[Qt 5.15]
+EOF
+
+# Configure
+PATH=%{host_install_dir}/bin:$PATH %{host_install_dir}/bin/python3 configure.py \
+	--verbose \
+	--confirm-license \
+	--no-dist-info \
+	--no-stubs \
+	--no-sip-files \
+	--qmake %{qt5_qmake} \
+	--sip %{host_install_dir}/bin/sip \
+	--disable QtSql \
+	--disable-feature PyQt_OpenGL \
+	--disable-feature PyQt_Desktop_OpenGL \
+	--configuration=config.txt \
+	-b %{install_dir}/bin \
+	-d %{install_dir}/lib/python%{python_version}/site-packages
+
+
+#PATH=/vortex/i686-w64-mingw32/test/bin:/vortex/x86_64-redhat-linux/test/bin:$PATH /vortex/x86_64-redhat-linux/test/bin/python3 configure.py --verbose --confirm-license --qmake /vortex/i686-w64-mingw32/test/bin/qmake --sip /vortex/x86_64-redhat-linux/test/bin/sip5 --disable-feature PyQt_Desktop_OpenGL --disable-feature PyQt_OpenGL --configuration=config.txt --disable QtSql
+
+%endif
 
 # Build using make
 %mingw32_make %{?_smp_mflags}

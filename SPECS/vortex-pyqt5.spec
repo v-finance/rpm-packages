@@ -1,26 +1,40 @@
-# upstream version
-%global major_version	5
-%global minor_version	13
-%global patch_version	2
-# RPM package release version
-%global release_version	2
-
 # bundle name
 %global bundle_name	%{getenv:VORTEX_BUNDLE}
 %if "%{bundle_name}" == ""
 %global bundle_name	stable
 %endif
 
+%if "%{bundle_name}" == "stable"
+# upstream version
+%global major_version	5
+%global minor_version	13
+%global patch_version	2
+# RPM package release version
+%global release_version	2
+%endif
+
+%if "%{bundle_name}" == "test"
+# upstream version
+%global major_version	5
+%global minor_version	15
+%global patch_version	0
+# RPM package release version
+%global release_version	1
+%endif
+
 Version: %{major_version}.%{minor_version}.%{patch_version}
 
-# Qt/PyQt 5.15.0 is not released yet, use dev version for now
-#%%global archive_file 	PyQt5-5.15.0.dev2005181617.tar.gz
-#%%global archive_url 	https://www.riverbankcomputing.com/static/Downloads/PyQt5/%{archive_file}
-#%%global archive_dir 	PyQt5-5.15.0.dev2005181617
-# use version 5.13.2 for now...
+%if "%{bundle_name}" == "stable"
 %global archive_file 	PyQt5-5.13.2.tar.gz
 %global archive_url 	https://www.riverbankcomputing.com/static/Downloads/PyQt5/5.13.2/%{archive_file}
 %global archive_dir 	PyQt5-5.13.2
+%endif
+
+%if "%{bundle_name}" == "test"
+%global archive_file 	PyQt5-5.15.0.tar.gz
+%global archive_url 	https://files.pythonhosted.org/packages/8c/90/82c62bbbadcca98e8c6fa84f1a638de1ed1c89e85368241e9cc43fcbc320/%{archive_file}
+%global archive_dir 	PyQt5-5.15.0
+%endif
 
 %global arch_triplet	%(gcc -dumpmachine)
 %global install_dir 	/vortex/%{arch_triplet}/%{bundle_name}
@@ -67,6 +81,10 @@ Patch0: pyqt5-5.13.2-qcoremod.patch
 Patch1: pyqt5-5.13.2-qpdfwriter.patch
 %endif
 
+%if "%{version}" == "5.15.0"
+Patch0: pyqt5-5.15.0-linux.patch
+%endif
+
 # ==========================================
 # Descriptions, and metadata for subpackages
 # ==========================================
@@ -90,6 +108,10 @@ cd %{archive_dir}
 %patch1 -p1 -b .backup
 %endif
 
+%if "%{version}" == "5.15.0"
+%patch0 -p1 -b .backup
+%endif
+
 # ======================================================
 # Configuring and building the code:
 # ======================================================
@@ -97,7 +119,10 @@ cd %{archive_dir}
 %build
 cd %{archive_dir}
 
+%if "%{bundle_name}" == "stable"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:%{install_dir}/lib"
+%endif
+
 # determine python version (e.g. 3.4)
 %global python_version $(%{install_dir}/bin/python3 -c 'import sys; print("{}.{}".format(sys.version_info.major, sys.version_info.minor))')
 # determine python short version (e.g. 34)

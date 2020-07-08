@@ -85,7 +85,7 @@ def build_package(ctx, package, bundle_name='stable'):
         shutil.rmtree(rpms_dir)
     os.makedirs(rpms_dir)
 
-    ctx.run("QA_RPATHS=$(( 0x0002 )) VORTEX_BUNDLE_NAME={} rpmbuild --define \"_rpmdir {}\" -bb {}".format(bundle_name, rpms_dir, get_spec_path(package)))
+    ctx.run("QA_RPATHS=$(( 0x0002 )) VORTEX_BUNDLE={} rpmbuild --define \"_rpmdir {}\" -bb {}".format(bundle_name, rpms_dir, get_spec_path(package)))
 
 
 @task
@@ -197,7 +197,7 @@ def mock_build_packages(ctx):
     #   --chain             build packages that depend on each other
     #   --recurse           retry until all packages build successfully
     #   --enable-network    make sure we can access github
-    ctx.run("mock --enable-network --recurse --chain {}".format(" ".join(packages)))
+    ctx.run("mock --verbose --enable-network --recurse --chain {}".format(" ".join(packages)))
 
 @task
 def mock_build_package(ctx, package):
@@ -219,6 +219,6 @@ def mock_build_package(ctx, package):
             packages.append(os.path.join(srpms_path, item))
     # run mock with options:
     #   --enable-network    make sure we can access github
-    cmd = "mock -r vortex-centos-8-x86_64 --enable-network {}".format(packages[0])
+    cmd = "mock --verbose -r vortex-centos-8-x86_64 --enable-network {}".format(packages[0])
     print(cmd)
     ctx.run(cmd)

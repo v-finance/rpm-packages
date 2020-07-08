@@ -71,7 +71,14 @@
 # qtlottie
 # qtquicktimeline
 # qtquick3d
+
+%if "%{bundle_name}" == "stable"
 %global	module_subset	qtbase,qtimageformats,qttools,qttranslations
+%endif
+
+%if "%{bundle_name}" == "test"
+%global	module_subset	qtbase,qtimageformats,qttools,qttranslations,qtdeclarative
+%endif
 
 # uncomment these to build examples and/or tests
 #%%global examples 1
@@ -80,6 +87,8 @@
 
 # ================= IT SHOULD NOT BE NECESSARY TO MAKE CHANGES BELOW ==============================
 
+# Avoid duplicate build-id files between bundles
+%global _build_id_links none
 
 # ==================
 # Top-level metadata
@@ -151,6 +160,10 @@ BuildRequires: pkgconfig(zlib)
 # Source code and patches
 # =======================
 
+%if "%{bundle_name}" == "test"
+Patch0: qt5-5.15.0-qtdeclarative.patch
+%endif
+
 # ==========================================
 # Descriptions, and metadata for subpackages
 # ==========================================
@@ -184,6 +197,10 @@ git checkout %{branch_name}
 # initialize git submodules
 ./init-repository --module-subset=%{module_subset}
 
+%if "%{bundle_name}" == "test"
+cd qtdeclarative
+%patch0 -p1 -b .backup
+%endif
 
 # ======================================================
 # Configuring and building the code:
@@ -198,6 +215,7 @@ cd qt5-build
 %global install_archdatadir	%{install_dir}/lib/qt5
 
 # configure
+%if "%{bundle_name}" == "stable"
 ../qt5/configure -verbose \
 	-opensource \
 	-confirm-license \
@@ -226,6 +244,39 @@ cd qt5-build
 	-system-libpng \
 	-system-zlib \
 	-no-directfb
+%endif
+
+%if "%{bundle_name}" == "test"
+../qt5/configure -verbose \
+	-opensource \
+	-confirm-license \
+	-release \
+  	-platform linux-g++ \
+	-shared \
+	-prefix %{install_dir} \
+	-archdatadir %{install_archdatadir} \
+	-datadir %{install_datadir} \
+  	%{!?examples:-nomake examples} \
+  	%{!?tests:-nomake tests} \
+  	-fontconfig \
+	-glib \
+	-gtk \
+  	-icu \
+  	%{?dbus}%{!?dbus:-dbus-runtime} \
+	%{?journald} \
+	%{?openssl} \
+	%{?sqlite} \
+	%{?pcre} \
+  	-no-pch \
+	-rpath \
+	-no-separate-debug-info \
+	-no-strip \
+	-system-libjpeg \
+	-system-libpng \
+	-system-zlib \
+	-no-directfb \
+	-no-opengl
+%endif
 
 %make_build
 
@@ -247,6 +298,8 @@ sed -i "s|#\!/usr/bin/python|#\!/usr/bin/python3|g" %{buildroot}%{install_archda
 
 
 %changelog
+* Tue Jul 07 2020 tim.vandermeersch@vortex-financials.be
+- Add qtdeclarative module and -no-opengl (bundle_name = test)
 * Tue May 26 2020 tim.vandermeersch@vortex-financials.be
 - Use bundle name
 * Tue May 19 2020 tim.vandermeersch@vortex-financials.be

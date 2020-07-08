@@ -1,0 +1,270 @@
+diff --git a/qpy/QtQuick/qpyquick_register_type.cpp b/qpy/QtQuick/qpyquick_register_type.cpp
+index 0ff1c7c..657a879 100644
+--- a/qpy/QtQuick/qpyquick_register_type.cpp
++++ b/qpy/QtQuick/qpyquick_register_type.cpp
+@@ -35,7 +35,7 @@ sipErrorState qpyquick_register_type(PyTypeObject *py_type,
+     // Make sure the types are tested in the right order (ie. more specific
+     // types first).
+ 
+-#if QT_VERSION >= 0x050200
++#if QT_VERSION >= 0x050200 && defined(SIP_FEATURE_PyQt_OpenGL)
+     if (PyType_IsSubtype(py_type, sipTypeAsPyTypeObject(sipType_QQuickFramebufferObject)))
+         return ((*rtp = QPyQuickFramebufferObject::addType(py_type, mo, ptr_name, list_name)) ? sipErrorNone : sipErrorFail);
+ #endif
+diff --git a/qpy/QtQuick/qpyquickframebufferobject.cpp b/qpy/QtQuick/qpyquickframebufferobject.cpp
+index 2f68fd2..147ef35 100644
+--- a/qpy/QtQuick/qpyquickframebufferobject.cpp
++++ b/qpy/QtQuick/qpyquickframebufferobject.cpp
+@@ -17,6 +17,7 @@
+ // This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+ // WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ 
++#if defined(SIP_FEATURE_PyQt_OpenGL)
+ 
+ #include <Python.h>
+ 
+@@ -186,3 +187,5 @@ QPYQUICKFRAMEBUFFEROBJECT_IMPL(28);
+ QPYQUICKFRAMEBUFFEROBJECT_IMPL(29);
+ 
+ #endif
++
++#endif
+diff --git a/qpy/QtQuick/qpyquickframebufferobject.h b/qpy/QtQuick/qpyquickframebufferobject.h
+index 7712e42..67ec2dc 100644
+--- a/qpy/QtQuick/qpyquickframebufferobject.h
++++ b/qpy/QtQuick/qpyquickframebufferobject.h
+@@ -17,6 +17,7 @@
+ // This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+ // WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ 
++#if defined(SIP_FEATURE_PyQt_OpenGL)
+ 
+ #ifndef _QPYQUICKFRAMEBUFFEROBJECT_H
+ #define _QPYQUICKFRAMEBUFFEROBJECT_H
+@@ -99,4 +100,6 @@ QPYQUICKFRAMEBUFFEROBJECT_DECL(29);
+ #endif
+ 
+ 
++#endif
++
+ #endif
+diff --git a/sip/QtQuick/qquickframebufferobject.sip b/sip/QtQuick/qquickframebufferobject.sip
+index 593cdf1..991a056 100644
+--- a/sip/QtQuick/qquickframebufferobject.sip
++++ b/sip/QtQuick/qquickframebufferobject.sip
+@@ -20,6 +20,7 @@
+ // WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ 
+ 
++%If (PyQt_OpenGL)
+ %If (Qt_5_2_0 -)
+ 
+ class QQuickFramebufferObject : QQuickItem /ExportDerived/
+@@ -82,3 +83,4 @@ signals:
+ };
+ 
+ %End
++%End
+diff --git a/sip/QtQuick/qquickrendercontrol.sip b/sip/QtQuick/qquickrendercontrol.sip
+index 1b7a364..0068b9e 100644
+--- a/sip/QtQuick/qquickrendercontrol.sip
++++ b/sip/QtQuick/qquickrendercontrol.sip
+@@ -36,7 +36,7 @@ public:
+     QQuickRenderControl(QObject *parent /TransferThis/ = 0);
+ %End
+     virtual ~QQuickRenderControl();
+-    void initialize(QOpenGLContext *gl);
++    //void initialize(QOpenGLContext *gl);
+     void invalidate();
+     void polishItems();
+     void render();
+diff --git a/sip/QtQuick/qquickwindow.sip b/sip/QtQuick/qquickwindow.sip
+index 47842b6..73d6ffc 100644
+--- a/sip/QtQuick/qquickwindow.sip
++++ b/sip/QtQuick/qquickwindow.sip
+@@ -67,7 +67,7 @@ class QQuickWindow : QWindow /ExportDerived/
+     #endif
+         {sipName_QSGTextureProvider, &sipType_QSGTextureProvider, -1, 10},
+         {sipName_QQuickWindow, &sipType_QQuickWindow, 14, -1},
+-    #if QT_VERSION >= 0x050200
++    #if QT_VERSION >= 0x050200 && defined(SIPFeature_PyQt_OpenGL)
+         {sipName_QQuickFramebufferObject, &sipType_QQuickFramebufferObject, -1, 12},
+     #else
+         {0, 0, -1, 12},
+@@ -124,8 +124,10 @@ public:
+     QQuickItem *mouseGrabberItem() const;
+     bool sendEvent(QQuickItem *, QEvent *);
+     QImage grabWindow() /ReleaseGIL/;
++%If (PyQt_OpenGL)
+     void setRenderTarget(QOpenGLFramebufferObject *fbo);
+     QOpenGLFramebufferObject *renderTarget() const;
++%End
+     void setRenderTarget(uint fboId, const QSize &size);
+     uint renderTargetId() const;
+     QSize renderTargetSize() const;
+@@ -146,7 +148,9 @@ public:
+     bool isPersistentOpenGLContext() const;
+     void setPersistentSceneGraph(bool persistent);
+     bool isPersistentSceneGraph() const;
++%If (PyQt_OpenGL)
+     QOpenGLContext *openglContext() const;
++%End
+ 
+ signals:
+     void frameSwapped();
+@@ -197,9 +201,11 @@ signals:
+ %End
+ 
+ public:
++%If (PyQt_OpenGL)
+ %If (Qt_5_2_0 -)
+     void resetOpenGLState();
+ %End
++%End
+ %If (Qt_5_3_0 -)
+ 
+     enum SceneGraphError
+@@ -210,9 +216,11 @@ public:
+ %End
+ 
+ signals:
++%If (PyQt_OpenGL)
+ %If (Qt_5_3_0 -)
+     void openglContextCreated(QOpenGLContext *context);
+ %End
++%End
+ %If (Qt_5_3_0 -)
+     void afterSynchronizing();
+ %End
+diff --git a/sip/QtQuick/qsgabstractrenderer.sip b/sip/QtQuick/qsgabstractrenderer.sip
+index 113024a..81cf50e 100644
+--- a/sip/QtQuick/qsgabstractrenderer.sip
++++ b/sip/QtQuick/qsgabstractrenderer.sip
+@@ -65,7 +65,7 @@ public:
+     QColor clearColor() const;
+     void setClearMode(QSGAbstractRenderer::ClearMode mode);
+     QSGAbstractRenderer::ClearMode clearMode() const;
+-    virtual void renderScene(GLuint fboId = 0) = 0;
++    //virtual void renderScene(GLuint fboId = 0) = 0;
+ 
+ signals:
+     void sceneGraphChanged();
+diff --git a/sip/QtQuick/qsgengine.sip b/sip/QtQuick/qsgengine.sip
+index 48ff00c..fcff6ef 100644
+--- a/sip/QtQuick/qsgengine.sip
++++ b/sip/QtQuick/qsgengine.sip
+@@ -47,7 +47,7 @@ public:
+     QSGEngine(QObject *parent /TransferThis/ = 0);
+ %End
+     virtual ~QSGEngine();
+-    void initialize(QOpenGLContext *context);
++    //void initialize(QOpenGLContext *context);
+     void invalidate();
+     QSGAbstractRenderer *createRenderer() const;
+     QSGTexture *createTextureFromImage(const QImage &image, QSGEngine::CreateTextureOptions options = QSGEngine::CreateTextureOption()) const;
+diff --git a/sip/QtQuick/qsggeometry.sip b/sip/QtQuick/qsggeometry.sip
+index 0f44a52..6fe6cd5 100644
+--- a/sip/QtQuick/qsggeometry.sip
++++ b/sip/QtQuick/qsggeometry.sip
+@@ -30,16 +30,19 @@ public:
+ // Convenient primitives and drawing modes.
+ enum /NoScope/
+ {
++%If (PyQt_OpenGL)
+     GL_BYTE,
+ %If (PyQt_Desktop_OpenGL)
+     GL_DOUBLE,
+ %End
+     GL_FLOAT,
+     GL_INT
++%End
+ };
+ 
+ enum /NoScope/
+ {
++%If (PyQt_OpenGL)
+     GL_POINTS,
+     GL_LINES,
+     GL_LINE_LOOP,
+@@ -47,6 +50,7 @@ enum /NoScope/
+     GL_TRIANGLES,
+     GL_TRIANGLE_STRIP,
+     GL_TRIANGLE_FAN
++%End
+ };
+ 
+     struct Attribute
+@@ -133,6 +137,7 @@ enum /NoScope/
+             
+                         switch (attr->type)
+                         {
++            #if defined(SIPFeature_PyQt_OpenGL)
+                         case GL_BYTE:
+                             size = sizeof (qint8);
+                             break;
+@@ -152,6 +157,7 @@ enum /NoScope/
+                         case GL_INT:
+                             size = sizeof (qint32);
+                             break;
++            #endif
+             
+                         default:
+                             size = 0;
+@@ -282,10 +288,12 @@ enum /NoScope/
+         StaticPattern,
+     };
+ 
++%If (PyQt_OpenGL)
+     QSGGeometry(const QSGGeometry::AttributeSet &attribs /KeepReference/, int vertexCount, int indexCount = 0, int indexType = GL_UNSIGNED_SHORT);
++%End
+     virtual ~QSGGeometry();
+-    void setDrawingMode(GLenum mode);
+-    GLenum drawingMode() const;
++    //void setDrawingMode(GLenum mode);
++    //GLenum drawingMode() const;
+     void allocate(int vertexCount, int indexCount = 0);
+     int vertexCount() const;
+     void *vertexData();
+diff --git a/sip/QtQuick/qsgmaterial.sip b/sip/QtQuick/qsgmaterial.sip
+index f5e021b..b875cc3 100644
+--- a/sip/QtQuick/qsgmaterial.sip
++++ b/sip/QtQuick/qsgmaterial.sip
+@@ -56,7 +56,7 @@ public:
+         QRect viewportRect() const;
+         QRect deviceRect() const;
+         float determinant() const;
+-        QOpenGLContext *context() const;
++        //QOpenGLContext *context() const;
+ %If (Qt_5_1_0 -)
+         QMatrix4x4 projectionMatrix() const;
+ %End
+@@ -124,11 +124,14 @@ public:
+         }
+ %End
+ 
+-    QOpenGLShaderProgram *program();
++    //QOpenGLShaderProgram *program();
+ 
+ protected:
++%If (PyQt_OpenGL)
+     virtual void compile();
++%End
+     virtual void initialize();
++%If (PyQt_OpenGL)
+ %If (Qt_5_2_0 -)
+     virtual const char *vertexShader() const;
+ %End
+@@ -142,10 +145,11 @@ protected:
+     virtual const char *fragmentShader() const = 0;
+ %End
+ %If (Qt_5_2_0 -)
+-    void setShaderSourceFile(QOpenGLShader::ShaderType type, const QString &sourceFile);
++    //void setShaderSourceFile(QOpenGLShader::ShaderType type, const QString &sourceFile);
+ %End
+ %If (Qt_5_2_0 -)
+-    void setShaderSourceFiles(QOpenGLShader::ShaderType type, const QStringList &sourceFiles);
++    //void setShaderSourceFiles(QOpenGLShader::ShaderType type, const QStringList &sourceFiles);
++%End
+ %End
+ 
+ private:
