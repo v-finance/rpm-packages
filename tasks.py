@@ -197,7 +197,7 @@ def mock_build_packages(ctx):
     #   --chain             build packages that depend on each other
     #   --recurse           retry until all packages build successfully
     #   --enable-network    make sure we can access github
-    ctx.run("mock --verbose --enable-network --recurse --chain {}".format(" ".join(packages)))
+    ctx.run("mock --enable-network --recurse --chain {}".format(" ".join(packages)))
 
 @task
 def mock_build_package(ctx, package):
@@ -219,6 +219,6 @@ def mock_build_package(ctx, package):
             packages.append(os.path.join(srpms_path, item))
     # run mock with options:
     #   --enable-network    make sure we can access github
-    cmd = "mock --verbose -r vortex-centos-8-x86_64 --enable-network {}".format(packages[0])
+    cmd = "mock -r vortex-centos-8-x86_64 --enable-network {}".format(packages[0])
     print(cmd)
     ctx.run(cmd)

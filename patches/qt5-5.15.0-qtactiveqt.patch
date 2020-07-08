@@ -1,0 +1,8 @@
+diff --git a/src/tools/tools.pro b/src/tools/tools.pro
+index 5824cfa..d8954f5 100644
+--- a/src/tools/tools.pro
++++ b/src/tools/tools.pro
+@@ -1,2 +1,2 @@
+ TEMPLATE = subdirs
+-SUBDIRS += idc
++#SUBDIRS += idc

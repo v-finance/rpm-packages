@@ -4,18 +4,24 @@
 # build 32-bit only
 %global mingw_build_win64 0
 
-# upstream version
-%global major_version	5
-%global minor_version	15
-%global patch_version	0
-# RPM package release version
-%global release_version	2
-
 # bundle name
 %global bundle_name	%{getenv:VORTEX_BUNDLE}
 %if "%{bundle_name}" == ""
 %global bundle_name	stable
 %endif
+
+# upstream version
+%global major_version	5
+%global minor_version	15
+%global patch_version	0
+# RPM package release version
+%if "%{bundle_name}" == "stable"
+%global release_version	2
+%endif
+%if "%{bundle_name}" == "test"
+%global release_version	3
+%endif
+
 
 # github repository
 %global	github_repo	https://github.com/qt/qt5.git
@@ -34,7 +40,7 @@
 %endif
 
 %if "%{bundle_name}" == "test"
-%global	module_subset	qtbase,qtimageformats,qttools,qttranslations,qtdeclarative
+%global	module_subset	qtbase,qtimageformats,qttools,qttranslations,qtdeclarative,qtactiveqt
 %endif
 
 # uncomment these to build examples and/or tests
@@ -83,6 +89,7 @@ BuildRequires:  mingw32-openssl
 
 %if "%{bundle_name}" == "test"
 Patch0: qt5-5.15.0-qtdeclarative.patch
+Patch1: qt5-5.15.0-qtactiveqt.patch
 %endif
 
 # ==========================================
@@ -131,6 +138,8 @@ git checkout %{branch_name}
 %if "%{bundle_name}" == "test"
 cd qtdeclarative
 %patch0 -p1 -b .backup
+cd ../qtactiveqt
+%patch1 -p1 -b .backup
 %endif
 
 # ======================================================
@@ -271,6 +280,8 @@ sed -i "s|#\!/usr/bin/python|#\!/usr/bin/python3|g" %{buildroot}%{install_archda
 %{install_dir}/bin/qmlscene.exe
 %{install_dir}/bin/qmltestrunner.exe
 %{install_dir}/bin/qmltyperegistrar
+%{install_dir}/bin/dumpcpp.exe
+%{install_dir}/bin/dumpdoc.exe
 %endif
 
 %changelog
