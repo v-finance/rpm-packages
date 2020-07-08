@@ -20,6 +20,13 @@ $ invoke install-build-deps <package>
 Next, the package can be build:
 
 $ invoke build-package <package>
+$ invoke build-package <package> --bundle-name=<bundle_name>
+
+For example:
+
+$ invoke build-package vortex-python3 --bundle-name=stable
+$ invoke build-package vortex-qt5 --bundle-name=test
+
 
 To build and install all packages, the following command can be used:
 
