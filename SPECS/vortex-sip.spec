@@ -14,7 +14,7 @@
 %global release_version	1
 %endif
 
-%if "%{bundle_name}" == "test"
+%if "%{bundle_name}" == "default"
 # upstream version
 %global major_version	4
 %global minor_version	19
@@ -70,7 +70,7 @@ Source0: %{archive_url}
 %if "%{bundle_name}" == "stable"
 Patch0: sip-4.19.x-configure-python34.patch
 %endif
-%if "%{bundle_name}" == "test"
+%if "%{bundle_name}" == "default"
 Patch0: sip-4.19.x-configure-python38.patch
 %endif
 

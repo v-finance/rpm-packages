@@ -18,7 +18,7 @@
 %if "%{bundle_name}" == "stable"
 %global release_version	2
 %endif
-%if "%{bundle_name}" == "test"
+%if "%{bundle_name}" == "default"
 %global release_version	3
 %endif
 
@@ -39,7 +39,7 @@
 %global	module_subset	qtbase,qtimageformats,qttools,qttranslations
 %endif
 
-%if "%{bundle_name}" == "test"
+%if "%{bundle_name}" == "default"
 %global	module_subset	qtbase,qtimageformats,qttools,qttranslations,qtdeclarative,qtactiveqt
 %endif
 
@@ -87,7 +87,7 @@ BuildRequires:  mingw32-openssl
 # Source code and patches
 # =======================
 
-%if "%{bundle_name}" == "test"
+%if "%{bundle_name}" == "default"
 Patch0: qt5-5.15.0-qtdeclarative.patch
 Patch1: qt5-5.15.0-qtactiveqt.patch
 %endif
@@ -135,7 +135,7 @@ git checkout %{branch_name}
 # initialize git submodules
 ./init-repository --module-subset=%{module_subset}
 
-%if "%{bundle_name}" == "test"
+%if "%{bundle_name}" == "default"
 cd qtdeclarative
 %patch0 -p1 -b .backup
 cd ../qtactiveqt
@@ -174,7 +174,7 @@ pushd build_win32
 	-no-sql-odbc
 %endif
 
-%if "%{bundle_name}" == "test"
+%if "%{bundle_name}" == "default"
 ../configure -verbose \
 	-opensource \
 	-confirm-license \
@@ -225,7 +225,7 @@ sed -i "s|#\!/usr/bin/python|#\!/usr/bin/python3|g" %{buildroot}%{install_archda
 %if "%{bundle_name}" == "stable"
 %{install_dir}/bin/Qt5OpenGL.dll
 %endif
-%if "%{bundle_name}" == "test"
+%if "%{bundle_name}" == "default"
 %{install_dir}/bin/Qt5Qml.dll
 %{install_dir}/bin/Qt5QmlModels.dll
 %{install_dir}/bin/Qt5QmlWorkerScript.dll
@@ -269,7 +269,7 @@ sed -i "s|#\!/usr/bin/python|#\!/usr/bin/python3|g" %{buildroot}%{install_archda
 %{install_dir}/bin/tracegen
 %{install_dir}/bin/uic
 %{install_dir}/bin/windeployqt
-%if "%{bundle_name}" == "test"
+%if "%{bundle_name}" == "default"
 %{install_dir}/bin/qml.exe
 %{install_dir}/bin/qmlcachegen
 %{install_dir}/bin/qmlformat

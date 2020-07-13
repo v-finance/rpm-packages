@@ -19,7 +19,7 @@
 %global release_version	2
 %endif
 
-%if "%{bundle_name}" == "test"
+%if "%{bundle_name}" == "default"
 # upstream version
 %global major_version	5
 %global minor_version	15
@@ -36,7 +36,7 @@ Version: %{major_version}.%{minor_version}.%{patch_version}
 %global archive_dir 	PyQt5-5.13.2
 %endif
 
-%if "%{bundle_name}" == "test"
+%if "%{bundle_name}" == "default"
 %global archive_file 	PyQt5-5.15.0.tar.gz
 %global archive_url 	https://files.pythonhosted.org/packages/8c/90/82c62bbbadcca98e8c6fa84f1a638de1ed1c89e85368241e9cc43fcbc320/%{archive_file}
 %global archive_dir 	PyQt5-5.15.0
@@ -183,7 +183,7 @@ echo "python_incdir: 	%{python_incdir}"
 
 %endif
 
-%if "%{bundle_name}" == "test"
+%if "%{bundle_name}" == "default"
 
 # create config.txt file
 cat > config.txt << EOF

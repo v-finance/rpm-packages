@@ -13,7 +13,7 @@
 %global release_version	2
 %endif
 
-%if "%{bundle_name}" == "test"
+%if "%{bundle_name}" == "default"
 # upstream version
 %global major_version	3
 %global minor_version	8
@@ -96,7 +96,7 @@ install DLLs/sqlite3.dll %{buildroot}%{install_dir}/bin
 install DLLs/python3.dll %{buildroot}%{install_dir}/bin
 %endif
 
-%if "%{bundle_name}" == "test"
+%if "%{bundle_name}" == "default"
 install python3.dll %{buildroot}%{install_dir}/bin
 install vcruntime140.dll %{buildroot}%{install_dir}/bin
 install DLLs/libcrypto-1_1.dll %{buildroot}%{install_dir}/bin
@@ -108,7 +108,7 @@ install DLLs/libssl-1_1.dll %{buildroot}%{install_dir}/bin
 mkdir -p %{buildroot}%{install_dir}/include/python%{short_version}
 install -m 644 include/*.h %{buildroot}%{install_dir}/include/python%{short_version}
 
-%if "%{bundle_name}" == "test"
+%if "%{bundle_name}" == "default"
 mkdir -p %{buildroot}%{install_dir}/include/python%{short_version}/cpython
 mkdir -p %{buildroot}%{install_dir}/include/python%{short_version}/internal
 install -m 644 include/cpython/*.h %{buildroot}%{install_dir}/include/python%{short_version}/cpython

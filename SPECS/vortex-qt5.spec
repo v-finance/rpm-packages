@@ -76,7 +76,7 @@
 %global	module_subset	qtbase,qtimageformats,qttools,qttranslations
 %endif
 
-%if "%{bundle_name}" == "test"
+%if "%{bundle_name}" == "default"
 %global	module_subset	qtbase,qtimageformats,qttools,qttranslations,qtdeclarative
 %endif
 
@@ -160,7 +160,7 @@ BuildRequires: pkgconfig(zlib)
 # Source code and patches
 # =======================
 
-%if "%{bundle_name}" == "test"
+%if "%{bundle_name}" == "default"
 Patch0: qt5-5.15.0-qtdeclarative.patch
 %endif
 
@@ -197,7 +197,7 @@ git checkout %{branch_name}
 # initialize git submodules
 ./init-repository --module-subset=%{module_subset}
 
-%if "%{bundle_name}" == "test"
+%if "%{bundle_name}" == "default"
 cd qtdeclarative
 %patch0 -p1 -b .backup
 %endif
@@ -246,7 +246,7 @@ cd qt5-build
 	-no-directfb
 %endif
 
-%if "%{bundle_name}" == "test"
+%if "%{bundle_name}" == "default"
 ../qt5/configure -verbose \
 	-opensource \
 	-confirm-license \

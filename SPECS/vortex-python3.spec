@@ -14,7 +14,7 @@
 %global release_version	3
 %endif
 
-%if "%{bundle_name}" == "test"
+%if "%{bundle_name}" == "default"
 # upstream version
 %global major_version	3
 %global minor_version	8
@@ -113,7 +113,7 @@ BuildRequires: /usr/sbin/ifconfig
 BuildRequires: vortex-%{bundle_name}-openssl
 %endif
 
-%if "%{bundle_name}" == "test"
+%if "%{bundle_name}" == "default"
 BuildRequires: openssl-devel
 %endif
 
