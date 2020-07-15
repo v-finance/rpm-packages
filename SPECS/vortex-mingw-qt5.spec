@@ -16,7 +16,7 @@
 %global patch_version	0
 # RPM package release version
 %if "%{bundle_name}" == "stable"
-%global release_version	2
+%global release_version	3
 %endif
 %if "%{bundle_name}" == "default"
 %global release_version	3
@@ -36,7 +36,7 @@
 %global install_dir 	/vortex/%{arch_triplet}/%{bundle_name}
 
 %if "%{bundle_name}" == "stable"
-%global	module_subset	qtbase,qtimageformats,qttools,qttranslations
+%global	module_subset	qtbase,qtimageformats,qttools,qttranslations,qtactiveqt
 %endif
 
 %if "%{bundle_name}" == "default"
@@ -87,9 +87,10 @@ BuildRequires:  mingw32-openssl
 # Source code and patches
 # =======================
 
+Patch0: qt5-5.15.0-qtactiveqt.patch
+
 %if "%{bundle_name}" == "default"
-Patch0: qt5-5.15.0-qtdeclarative.patch
-Patch1: qt5-5.15.0-qtactiveqt.patch
+Patch1: qt5-5.15.0-qtdeclarative.patch
 %endif
 
 # ==========================================
@@ -135,10 +136,12 @@ git checkout %{branch_name}
 # initialize git submodules
 ./init-repository --module-subset=%{module_subset}
 
+cd qtactiveqt
+%patch0 -p1 -b .backup
+cd ..
+
 %if "%{bundle_name}" == "default"
 cd qtdeclarative
-%patch0 -p1 -b .backup
-cd ../qtactiveqt
 %patch1 -p1 -b .backup
 %endif
 
@@ -269,6 +272,8 @@ sed -i "s|#\!/usr/bin/python|#\!/usr/bin/python3|g" %{buildroot}%{install_archda
 %{install_dir}/bin/tracegen
 %{install_dir}/bin/uic
 %{install_dir}/bin/windeployqt
+%{install_dir}/bin/dumpcpp.exe
+%{install_dir}/bin/dumpdoc.exe
 %if "%{bundle_name}" == "default"
 %{install_dir}/bin/qml.exe
 %{install_dir}/bin/qmlcachegen
@@ -280,8 +285,6 @@ sed -i "s|#\!/usr/bin/python|#\!/usr/bin/python3|g" %{buildroot}%{install_archda
 %{install_dir}/bin/qmlscene.exe
 %{install_dir}/bin/qmltestrunner.exe
 %{install_dir}/bin/qmltyperegistrar
-%{install_dir}/bin/dumpcpp.exe
-%{install_dir}/bin/dumpdoc.exe
 %endif
 
 %changelog

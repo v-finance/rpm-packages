@@ -16,7 +16,7 @@
 %global minor_version	13
 %global patch_version	2
 # RPM package release version
-%global release_version	2
+%global release_version	3
 %endif
 
 %if "%{bundle_name}" == "default"
