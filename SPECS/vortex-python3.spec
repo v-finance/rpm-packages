@@ -11,7 +11,7 @@
 %global minor_version	4
 %global patch_version	4
 # RPM package release version
-%global release_version	3
+%global release_version	4
 %endif
 
 %if "%{bundle_name}" == "default"
@@ -205,10 +205,6 @@ sed -i "s|#\!/usr/bin/env python|#\!%{install_dir}/bin/python3|g" %{buildroot}%{
 %post
 # Install pip
 %{install_dir}/bin/python3 -m ensurepip
-
-%postun
-# remove files installed by pip packages etc.
-rm -rf %{install_dir}/lib/python%{pybasever}
 
 
 %files
