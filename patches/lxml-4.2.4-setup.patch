@@ -1,0 +1,31 @@
+diff --git a/setup.py b/setup.py
+index ce87b91..ea517c9 100644
+--- a/setup.py
++++ b/setup.py
+@@ -11,10 +11,12 @@ if sys.version_info < (2, 6) or sys.version_info[:2] in [(3, 0), (3, 1)]:
+     print("This lxml version requires Python 2.6, 2.7, 3.2 or later.")
+     sys.exit(1)
+ 
+-try:
+-    from setuptools import setup
+-except ImportError:
+-    from distutils.core import setup
++#try:
++#    from setuptools import setup
++#except ImportError:
++#    from distutils.core import setup
++
++from skbuild import setup
+ 
+ # make sure Cython finds include files in the project directory and not outside
+ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+@@ -148,7 +150,8 @@ def setup_extra_options():
+     ext_modules = setupinfo.ext_modules(
+                     STATIC_INCLUDE_DIRS, STATIC_LIBRARY_DIRS,
+                     STATIC_CFLAGS, STATIC_BINARIES)
+-    extra_opts['ext_modules'] = ext_modules
++    #extra_opts['ext_modules'] = ext_modules
++    extra_opts['ext_modules'] = []
+ 
+     packages = extra_opts.get('packages', list())
+     package_dir = extra_opts.get('package_dir', dict())
