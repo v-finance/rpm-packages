@@ -7,8 +7,8 @@
 %if "%{bundle_name}" == "stable"
 # upstream version
 %global major_version	5
-%global minor_version	13
-%global patch_version	2
+%global minor_version	15
+%global patch_version	0
 # RPM package release version
 %global release_version	2
 %endif
@@ -25,9 +25,9 @@
 Version: %{major_version}.%{minor_version}.%{patch_version}
 
 %if "%{bundle_name}" == "stable"
-%global archive_file 	PyQt5-5.13.2.tar.gz
-%global archive_url 	https://www.riverbankcomputing.com/static/Downloads/PyQt5/5.13.2/%{archive_file}
-%global archive_dir 	PyQt5-5.13.2
+%global archive_file 	PyQt5-5.15.0.tar.gz
+%global archive_url 	https://files.pythonhosted.org/packages/8c/90/82c62bbbadcca98e8c6fa84f1a638de1ed1c89e85368241e9cc43fcbc320/%{archive_file}
+%global archive_dir 	PyQt5-5.15.0
 %endif
 
 %if "%{bundle_name}" == "default"
