@@ -19,7 +19,7 @@ def copy_patches():
     """
     script_path = os.path.realpath(__file__)
     script_dir = os.path.dirname(script_path)
-    os.system("cp {}/patches/*.patch ~/rpmbuild/SOURCES".format(script_dir))
+    os.system("cp {}/patches/* ~/rpmbuild/SOURCES".format(script_dir))
 
 
 def get_spec_path(package):
@@ -85,7 +85,7 @@ def build_package(ctx, package, bundle_name='stable'):
         shutil.rmtree(rpms_dir)
     os.makedirs(rpms_dir)
 
-    ctx.run("QA_RPATHS=$(( 0x0002 )) VORTEX_BUNDLE={} rpmbuild --define \"_rpmdir {}\" -bb {}".format(bundle_name, rpms_dir, get_spec_path(package)))
+    ctx.run("QA_RPATHS=$(( 0x0002 )) VORTEX_BUNDLE={} rpmbuild --define \"bundle_name {}\" --define \"_rpmdir {}\" -bb {}".format(bundle_name, bundle_name, rpms_dir, get_spec_path(package)))
 
 
 @task

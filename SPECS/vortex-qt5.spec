@@ -1,15 +1,14 @@
+# bundle name
+%if %{undefined bundle_name}
+%define bundle_name stable
+%endif
+
 # upstream version
 %global major_version	5
 %global minor_version	15
 %global patch_version	0
 # RPM package release version
 %global release_version	4
-
-# bundle name
-%global bundle_name	%{getenv:VORTEX_BUNDLE}
-%if "%{bundle_name}" == ""
-%global bundle_name	stable
-%endif
 
 # github repository
 %global	github_repo	https://github.com/qt/qt5.git

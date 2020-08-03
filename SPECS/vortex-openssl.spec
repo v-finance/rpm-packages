@@ -1,15 +1,14 @@
+# bundle name
+%if %{undefined bundle_name}
+%define bundle_name stable
+%endif
+
 # upstream version
 %global major_version	1
 %global minor_version	0
 %global patch_version	2u
 # RPM package release version
 %global release_version	1
-
-# bundle name
-%global bundle_name	%{getenv:VORTEX_BUNDLE}
-%if "%{bundle_name}" == ""
-%global bundle_name	stable
-%endif
 
 %global archive_file 	OpenSSL_1_0_2u.tar.gz
 %global archive_dir 	openssl-OpenSSL_1_0_2u
