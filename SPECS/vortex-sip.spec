@@ -9,7 +9,7 @@
 # upstream version
 %global major_version	4
 %global minor_version	19
-%global patch_version	22
+%global patch_version	23
 # RPM package release version
 %global release_version	1
 %endif
@@ -166,6 +166,8 @@ make INSTALL_ROOT=%{buildroot} INSTALL="install -p" install
 
 
 %changelog
+* Wed Jul 29 2020 tim.vandermeersch@vortex-financials.be
+- Upgrade stable build to SIP 4.19.23
 * Wed Jul 08 2020 tim.vandermeersch@vortex-financials.be
 - Add SIP 4.19.23 (bundle_name = test)
 * Tue May 26 2020 tim.vandermeersch@vortex-financials.be
