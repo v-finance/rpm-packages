@@ -14,9 +14,9 @@
 # upstream version
 %global major_version	4
 %global minor_version	19
-%global patch_version	22
+%global patch_version	23
 # RPM package release version
-%global release_version	3
+%global release_version	1
 %endif
 
 %if "%{bundle_name}" == "default"
