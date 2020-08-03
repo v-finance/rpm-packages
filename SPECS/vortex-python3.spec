@@ -1,9 +1,7 @@
 # bundle name
-%global bundle_name	%{getenv:VORTEX_BUNDLE}
-%if "%{bundle_name}" == ""
-%global bundle_name	stable
+%if %{undefined bundle_name}
+%define bundle_name stable
 %endif
-
 
 %if "%{bundle_name}" == "stable"
 # upstream version
@@ -104,10 +102,10 @@ BuildRequires: tar
 BuildRequires: xz-devel
 BuildRequires: zlib-devel
 
-BuildRequires: /usr/bin/dtrace
+#BuildRequires: /usr/bin/dtrace
 
 # workaround http://bugs.python.org/issue19804 (test_uuid requires ifconfig)
-BuildRequires: /usr/sbin/ifconfig
+#BuildRequires: /usr/sbin/ifconfig
 
 %if "%{bundle_name}" == "stable"
 BuildRequires: vortex-%{bundle_name}-openssl
