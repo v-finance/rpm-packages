@@ -13,10 +13,10 @@
 %if "%{bundle_name}" == "stable"
 # upstream version
 %global major_version	5
-%global minor_version	13
-%global patch_version	2
+%global minor_version	15
+%global patch_version	0
 # RPM package release version
-%global release_version	3
+%global release_version	1
 %endif
 
 %if "%{bundle_name}" == "default"
@@ -30,17 +30,9 @@
 
 Version: %{major_version}.%{minor_version}.%{patch_version}
 
-%if "%{bundle_name}" == "stable"
-%global archive_file 	PyQt5-5.13.2.tar.gz
-%global archive_url 	https://www.riverbankcomputing.com/static/Downloads/PyQt5/5.13.2/%{archive_file}
-%global archive_dir 	PyQt5-5.13.2
-%endif
-
-%if "%{bundle_name}" == "default"
 %global archive_file 	PyQt5-5.15.0.tar.gz
 %global archive_url 	https://files.pythonhosted.org/packages/8c/90/82c62bbbadcca98e8c6fa84f1a638de1ed1c89e85368241e9cc43fcbc320/%{archive_file}
 %global archive_dir 	PyQt5-5.15.0
-%endif
 
 %global arch_triplet	%(i686-w64-mingw32-gcc -dumpmachine)
 %global install_dir 	/vortex/%{arch_triplet}/%{bundle_name}
@@ -147,7 +139,7 @@ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:%{host_install_dir}/lib"
 
 # create config.txt file
 cat > config.txt << EOF
-py_platform=win32-g++
+py_platform=win32
 py_inc_dir=%{install_dir}/include/python%{python_version}
 py_pylib_dir=%{install_dir}/lib
 py_pylib_lib=python%{python_short_version}
